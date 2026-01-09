@@ -220,9 +220,10 @@ const DistanceWeeklyChart = ({ weeklyDistanceData, goalDistance, onTestIncrement
                                 <View key={index} style={styles.barColumn}>
                                     {tooltipVisible && isSelected && selectedBarValue !== null && ( 
                                         <View style={[styles.tooltipPositioner, { bottom: barHeight + 30 }]}>
-                                            <View style={styles.tooltipBox}>
-                                                <Text style={styles.tooltipText}>{selectedBarValue.toFixed(1)} {translation.kmUnit}</Text>
-                                            </View>
+<View style={[styles.tooltipBox, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+    <Text style={styles.tooltipText}>{selectedBarValue.toFixed(1)}</Text>
+    <Text style={[styles.tooltipText, { marginHorizontal: 3 }]}>{translation.kmUnit}</Text>
+</View>
                                             <View style={styles.tooltipArrow} />
                                         </View> 
                                     )}
