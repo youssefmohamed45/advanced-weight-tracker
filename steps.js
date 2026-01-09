@@ -83,10 +83,15 @@ const describeArc = (x, y, radius, startAngleDeg, endAngleDeg) => {
     return d; 
 };
 
-const calculateIconPositionOnPath = (angleDegrees) => { 
+// --- [تعديل 1] إضافة معامل اللغة لعكس الاتجاه في الإنجليزي ---
+const calculateIconPositionOnPath = (angleDegrees, lang = 'ar') => { 
     const angleRad = (angleDegrees * Math.PI) / 180; 
     const iconRadius = PATH_RADIUS; 
-    const xOffset = -iconRadius * Math.sin(angleRad); 
+    
+    // إذا كان عربي (ar) استخدم -1، إذا إنجليزي استخدم 1 لعكس الاتجاه ليصبح يمين (مع عقارب الساعة)
+    const direction = lang === 'ar' ? -1 : 1;
+
+    const xOffset = direction * iconRadius * Math.sin(angleRad); 
     const yOffset = -iconRadius * Math.cos(angleRad); 
     const iconCenterX = CENTER_X + xOffset; 
     const iconCenterY = CENTER_Y + yOffset; 
@@ -532,7 +537,8 @@ const StepsScreen = (props) => {
     const clampedProgress = useMemo(() => Math.min(100, Math.max(0, progressPercentage || 0)), [progressPercentage]);
     const targetAngle = useMemo(() => { if (stepsForSelectedDay <= 0 || goalSteps <= 0) return 0; const angle = clampedProgress * 3.6; return Math.min(359.999, Math.max(0.01, angle || 0)); }, [stepsForSelectedDay, goalSteps, clampedProgress]);
     
-    const [dynamicIconStyle, setDynamicIconStyle] = useState(() => calculateIconPositionOnPath(0));
+    // --- [تعديل 2] تمرير اللغة المبدئية عند تهيئة State ---
+    const [dynamicIconStyle, setDynamicIconStyle] = useState(() => calculateIconPositionOnPath(0, initialLanguage || (I18nManager.isRTL ? 'ar' : 'en')));
     const [progressPathD, setProgressPathD] = useState('');
 
     const { formattedDuration, formattedCalories, formattedDistance } = useMemo(() => { 
@@ -575,11 +581,12 @@ const StepsScreen = (props) => {
 
     useEffect(() => { 
         const listenerId = animatedAngle.addListener(({ value }) => { 
-            setDynamicIconStyle(calculateIconPositionOnPath(value)); 
+            // --- [تعديل 3] تمرير اللغة الحالية لحساب المكان ---
+            setDynamicIconStyle(calculateIconPositionOnPath(value, language)); 
             setProgressPathD(value > 0.01 ? describeArc(CENTER_X, CENTER_Y, PATH_RADIUS, 0.01, value) : ''); 
         }); 
         return () => animatedAngle.removeListener(listenerId); 
-    }, [animatedAngle]);
+    }, [animatedAngle, language]); // إضافة language كمصفوفة اعتماد
 
     
     useEffect(() => { let isMounted = true; let initialLoad = true; const subscribe = async () => { try { const available = await Pedometer.isAvailableAsync(); if (!isMounted) return; setIsPedometerAvailable(String(available)); if (available) { const { status } = await Pedometer.requestPermissionsAsync(); if (!isMounted) return; if (status === 'granted') { const end = new Date(); const start = new Date(); start.setHours(0, 0, 0, 0); try { const pastStepCountResult = await Pedometer.getStepCountAsync(start, end); if (isMounted && pastStepCountResult) { const initialSteps = pastStepCountResult.steps || 0; setCurrentSteps(initialSteps); if (initialLoad) { await saveDailySteps(new Date(), initialSteps); initialLoad = false; } } } catch (error) { if (isMounted) { console.error("Pedometer getStepCountAsync error:", error); } } pedometerSubscription.current = Pedometer.watchStepCount(result => { if (!isMounted) return; const fetchTodaysSteps = async () => { const endOfDay = new Date(); const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0); try { const stepCount = await Pedometer.getStepCountAsync(startOfDay, endOfDay); if (isMounted && stepCount) { const newTotalStepsToday = stepCount.steps || 0; setCurrentSteps(prevActualSteps => { if (newTotalStepsToday !== prevActualSteps) { saveDailySteps(new Date(), newTotalStepsToday); if (newTotalStepsToday > prevActualSteps) { setIsStepping(true); if (stopSteppingTimer.current) clearTimeout(stopSteppingTimer.current); stopSteppingTimer.current = setTimeout(() => { if (isMounted) setIsStepping(false); }, RUNNER_STOP_DELAY); } } return newTotalStepsToday; }); } } catch (err) { if (isMounted) console.error("Error fetching step count in watch:", err); } }; fetchTodaysSteps(); }); } else { if (isMounted) { console.warn("Pedometer permission not granted."); setIsPedometerAvailable('permission_denied'); } } } else { if (isMounted) { console.warn("Pedometer not available."); setIsPedometerAvailable('not_available'); } } } catch (error) { if (isMounted) { console.error("Pedometer setup error:", error); setIsPedometerAvailable('error'); } } }; if(!isLoading) { subscribe(); } return () => { isMounted = false; if (pedometerSubscription.current) { pedometerSubscription.current.remove(); pedometerSubscription.current = null; } if (animationFrameRef.current) { cancelAnimationFrame(animationFrameRef.current); animationFrameRef.current = null; isAnimatingSteps.current = false; } if(stopSteppingTimer.current) clearTimeout(stopSteppingTimer.current); setIsStepping(false); }; }, [saveDailySteps, animateDisplaySteps, isLoading]);
@@ -600,7 +607,10 @@ const StepsScreen = (props) => {
         } 
     }, [tempGoal, translation]);
 
-    const resetSteps = useCallback(async () => { Alert.alert( translation.resetConfirmationTitle, translation.resetConfirmationMessage, [ { text: translation.cancel, style: "cancel" }, { text: translation.resetTodaySteps, style: "destructive", onPress: async () => { if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current); isAnimatingSteps.current = false; animatedAngle.stopAnimation(); if (stopSteppingTimer.current) clearTimeout(stopSteppingTimer.current); setIsStepping(false); setCurrentSteps(0); setStepsForSelectedDay(0); setDisplaySteps(0); animatedAngle.setValue(0); setProgressPathD(''); setDynamicIconStyle(calculateIconPositionOnPath(0)); await saveDailySteps(new Date(), 0); if(isCurrentWeekSelected && (selectedPeriod === 'day' || selectedPeriod === 'week')) setSelectedWeekStart(prev => new Date(prev.getTime())); if(isCurrentMonthSelected && selectedPeriod === 'month') setSelectedMonthStart(prev => new Date(prev.getTime())); closeMenuModal(); } } ] ); }, [animatedAngle, isCurrentWeekSelected, isCurrentMonthSelected, selectedPeriod, closeMenuModal, saveDailySteps, translation]);
+    const resetSteps = useCallback(async () => { Alert.alert( translation.resetConfirmationTitle, translation.resetConfirmationMessage, [ { text: translation.cancel, style: "cancel" }, { text: translation.resetTodaySteps, style: "destructive", onPress: async () => { if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current); isAnimatingSteps.current = false; animatedAngle.stopAnimation(); if (stopSteppingTimer.current) clearTimeout(stopSteppingTimer.current); setIsStepping(false); setCurrentSteps(0); setStepsForSelectedDay(0); setDisplaySteps(0); animatedAngle.setValue(0); setProgressPathD(''); 
+    // --- [تعديل 4] تحديث المكان عند التصفير ---
+    setDynamicIconStyle(calculateIconPositionOnPath(0, language)); 
+    await saveDailySteps(new Date(), 0); if(isCurrentWeekSelected && (selectedPeriod === 'day' || selectedPeriod === 'week')) setSelectedWeekStart(prev => new Date(prev.getTime())); if(isCurrentMonthSelected && selectedPeriod === 'month') setSelectedMonthStart(prev => new Date(prev.getTime())); closeMenuModal(); } } ] ); }, [animatedAngle, isCurrentWeekSelected, isCurrentMonthSelected, selectedPeriod, closeMenuModal, saveDailySteps, translation, language]);
     const addStepsTest = useCallback(() => { const increment = 500; const nextActualSteps = currentSteps + increment; setCurrentSteps(nextActualSteps); setStepsForSelectedDay(nextActualSteps); setDisplaySteps(nextActualSteps); saveDailySteps(new Date(), nextActualSteps); setIsStepping(true); if (stopSteppingTimer.current) clearTimeout(stopSteppingTimer.current); stopSteppingTimer.current = setTimeout(() => { setIsStepping(false); }, RUNNER_STOP_DELAY); closeMenuModal(); }, [currentSteps, saveDailySteps, closeMenuModal]);
     const openGoalModal = useCallback(() => { setTempGoal(goalSteps); setIsMenuModalVisible(false); setIsGoalModalVisible(true); }, [goalSteps]);
     const handleCancelGoal = useCallback(() => { setIsGoalModalVisible(false); }, []);

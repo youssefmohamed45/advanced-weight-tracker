@@ -140,11 +140,15 @@ const describeArc = (x, y, radius, startAngleDeg, endAngleDeg) => {
   return d;
 };
 
-const calculateIconPositionOnPath = (angleDegrees) => { 
+// --- [تعديل 1] إضافة معامل اللغة لعكس الاتجاه في الإنجليزي ---
+const calculateIconPositionOnPath = (angleDegrees, lang = 'ar') => { 
     const angleRad = (angleDegrees * Math.PI) / 180; 
     const iconRadius = PATH_RADIUS; 
     
-    const xOffset = -iconRadius * Math.sin(angleRad); 
+    // إذا كان عربي (ar) استخدم -1، إذا إنجليزي استخدم 1 لعكس الاتجاه ليصبح يمين (مع عقارب الساعة)
+    const direction = lang === 'ar' ? -1 : 1;
+
+    const xOffset = direction * iconRadius * Math.sin(angleRad); 
     const yOffset = -iconRadius * Math.cos(angleRad); 
 
     const iconCenterX = CENTER_X + xOffset; 
@@ -337,7 +341,9 @@ const DayView = ({ goalHour, goalMinute, onOpenGoalModal, activeTimeForDate, cur
   const progress = goalInMinutes > 0 ? (activeTimeForDate / goalInMinutes) * 100 : 0;
   const clampedProgress = Math.min(100, Math.max(0, progress));
   const animatedAngle = useRef(new Animated.Value(0)).current;
-  const [dynamicDotStyle, setDynamicDotStyle] = useState(() => calculateIconPositionOnPath(0));
+  
+  // --- [تعديل 2] تمرير اللغة المبدئية عند تهيئة State ---
+  const [dynamicDotStyle, setDynamicDotStyle] = useState(() => calculateIconPositionOnPath(0, language));
   
   const targetAngle = clampedProgress > 0 ? clampedProgress * 3.6 : 0;
   const formatTime = (num) => num.toString().padStart(2, '0');
@@ -358,7 +364,8 @@ const DayView = ({ goalHour, goalMinute, onOpenGoalModal, activeTimeForDate, cur
 
   useEffect(() => {
     const listenerId = animatedAngle.addListener(({ value }) => {
-      setDynamicDotStyle(calculateIconPositionOnPath(value));
+      // --- [تعديل 3] تمرير اللغة الحالية لليسنر ---
+      setDynamicDotStyle(calculateIconPositionOnPath(value, language));
       setProgressPathD(value > 0.01 ? describeArc(CENTER_X, CENTER_Y, PATH_RADIUS, 0.01, value) : '');
     });
     const timeListenerId = animatedTime.addListener(v => {
@@ -368,7 +375,7 @@ const DayView = ({ goalHour, goalMinute, onOpenGoalModal, activeTimeForDate, cur
       setDisplayTimeText(`${formatTime(h)}:${formatTime(m)}`);
     });
     return () => { animatedAngle.removeListener(listenerId); animatedTime.removeListener(timeListenerId); };
-  }, [animatedAngle, animatedTime]);
+  }, [animatedAngle, animatedTime, language]); // إضافة language للاعتماديات
 
   return (
     <View style={currentStyles.dayViewContainer}>

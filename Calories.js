@@ -131,11 +131,15 @@ const translations = {
 };
 
 // *** دوال الرسم والحساب ***
-const calculateIconPositionOnPath = (angleDegrees) => { 
+// --- [تعديل 1] إضافة معامل اللغة لعكس الاتجاه في الإنجليزي ---
+const calculateIconPositionOnPath = (angleDegrees, lang = 'ar') => { 
     const angleRad = (angleDegrees * Math.PI) / 180; 
     const iconRadius = PATH_RADIUS; 
     
-    const xOffset = -iconRadius * Math.sin(angleRad); 
+    // إذا كان عربي (ar) استخدم -1، إذا إنجليزي استخدم 1 لعكس الاتجاه ليصبح يمين (مع عقارب الساعة)
+    const direction = lang === 'ar' ? -1 : 1;
+
+    const xOffset = direction * iconRadius * Math.sin(angleRad); 
     const yOffset = -iconRadius * Math.cos(angleRad); 
 
     const iconCenterX = CENTER_X + xOffset; 
@@ -180,7 +184,6 @@ const AnimatedStatItem = React.memo(({ type, value, unit, styles, formatter }) =
     return ( <View style={styles.statItem}><View style={styles.statIconCircle}><MaterialCommunityIcon name={iconName} size={24} color={styles.statIcon.color} /></View><Text style={styles.statValue}>{displayValue}</Text><Text style={styles.statUnit}>{unit}</Text></View> );
 });
 
-// *** المكون المعدل: ActivityChart ***
 // *** المكون المعدل: ActivityChart ***
 const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, language, dayNames, title }) => { 
     const [tooltipVisible, setTooltipVisible] = useState(false); 
@@ -332,7 +335,10 @@ const CaloriesScreen = (props) => {
     const animationFrameRef = useRef(null);
     const pedometerSubscription = useRef(null);
     const displayCaloriesRef = useRef(displayCalories);
-    const [dynamicIconStyle, setDynamicIconStyle] = useState(() => calculateIconPositionOnPath(0));
+    
+    // --- [تعديل 2] تمرير اللغة المبدئية عند تهيئة State ---
+    const [dynamicIconStyle, setDynamicIconStyle] = useState(() => calculateIconPositionOnPath(0, initialLanguage || (I18nManager.isRTL ? 'ar' : 'en')));
+    
     const [progressPathD, setProgressPathD] = useState('');
 
     const navigateTo = (screenName) => { closeTitleMenu(); if (onNavigate) onNavigate(screenName); };
@@ -459,7 +465,14 @@ const CaloriesScreen = (props) => {
     const targetAngle = useMemo(() => clampedProgress * 3.6, [clampedProgress]);
     
     useEffect(() => { Animated.timing(animatedAngle, { toValue: targetAngle, duration: 1000, useNativeDriver: false }).start(); }, [targetAngle]);
-    useEffect(() => { const listenerId = animatedAngle.addListener(({ value }) => { setProgressPathD(value > 0.01 ? describeArc(CENTER_X, CENTER_Y, PATH_RADIUS, 0.01, value) : ''); setDynamicIconStyle(calculateIconPositionOnPath(value > 0.01 ? value : 0)); }); return () => animatedAngle.removeListener(listenerId); }, [animatedAngle]);
+    useEffect(() => { 
+        const listenerId = animatedAngle.addListener(({ value }) => { 
+            setProgressPathD(value > 0.01 ? describeArc(CENTER_X, CENTER_Y, PATH_RADIUS, 0.01, value) : ''); 
+            // --- [تعديل 3] تمرير اللغة الحالية لليسنر ---
+            setDynamicIconStyle(calculateIconPositionOnPath(value > 0.01 ? value : 0, language)); 
+        }); 
+        return () => animatedAngle.removeListener(listenerId); 
+    }, [animatedAngle, language]); // إضافة language كمصفوفة اعتماد
     
     const stepsAtGoal = useMemo(() => (goalCalories > 0 && CALORIES_PER_STEP > 0) ? (goalCalories / CALORIES_PER_STEP) : Infinity, [goalCalories]);
     const effectiveStepsForDisplay = useMemo(() => Math.min(stepsForDate, stepsAtGoal), [stepsForDate, stepsAtGoal]);

@@ -91,10 +91,15 @@ const describeArc = (x, y, radius, startAngleDeg, endAngleDeg) => {
     return d; 
 };
 
-const calculateIconPositionOnPath = (angleDegrees) => { 
+// --- [تعديل 1] إضافة معامل اللغة لعكس الاتجاه في الإنجليزي ---
+const calculateIconPositionOnPath = (angleDegrees, lang = 'ar') => { 
     const angleRad = (angleDegrees * Math.PI) / 180; 
     const iconRadius = PATH_RADIUS; 
-    const xOffset = -iconRadius * Math.sin(angleRad); 
+    
+    // إذا كان عربي (ar) استخدم -1، إذا إنجليزي استخدم 1 لعكس الاتجاه ليصبح يمين (مع عقارب الساعة)
+    const direction = lang === 'ar' ? -1 : 1;
+
+    const xOffset = direction * iconRadius * Math.sin(angleRad); 
     const yOffset = -iconRadius * Math.cos(angleRad); 
     const iconCenterX = CENTER_X + xOffset; 
     const iconCenterY = CENTER_Y + yOffset; 
@@ -148,7 +153,7 @@ const ChallengeCard = ({ onPress, currentChallengeDuration, remainingDays, trans
     ); 
 };
 
-// *** مكون الرسم البياني الأسبوعي (تم التعديل لضبط اتجاه الإنجليزي) ***
+// *** مكون الرسم البياني الأسبوعي ***
 const DistanceWeeklyChart = ({ weeklyDistanceData, goalDistance, onTestIncrement, onResetData, translation, styles, language }) => { 
     const [tooltipVisible, setTooltipVisible] = useState(false); 
     const [selectedBarIndex, setSelectedBarIndex] = useState(null); 
@@ -159,9 +164,6 @@ const DistanceWeeklyChart = ({ weeklyDistanceData, goalDistance, onTestIncrement
     const jsDayIndex = today.getDay(); 
     const displayDayIndex = (jsDayIndex - startOfWeekDay + 7) % 7; 
     
-    // تعديل الاتجاهات:
-    // الإنجليزي: row (من اليسار) والعنوان flex-start (يسار)
-    // العربي: row-reverse (من اليمين) والعنوان flex-end (يمين)
     const chartDirection = language === 'ar' ? 'row' : 'row';
     const headerAlign = language === 'ar' ? 'flex-start' : 'flex-start';
 
@@ -207,9 +209,7 @@ const DistanceWeeklyChart = ({ weeklyDistanceData, goalDistance, onTestIncrement
                     {yAxisLabels.map(label => <Text key={label} style={styles.axisLabelY}>{label}</Text>)}
                 </View>
                 
-                {/* تعديل الهامش بناءً على اللغة */}
                 <View style={[styles.chartContent, { [language === 'ar' ? 'marginRight' : 'marginLeft']: 10 }]}>
-                    {/* تعديل اتجاه الأعمدة بناءً على اللغة */}
                     <View style={[styles.barsAndLabelsContainer, { flexDirection: language === 'ar' ? 'row' : 'row' }]}>
                         {days.map((dayName, index) => { 
                             const value = weeklyDistanceData[index] || 0; 
@@ -264,7 +264,10 @@ const DistanceScreen = (props) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const animatedAngle = useRef(new Animated.Value(0)).current;
-  const [dynamicIconStyle, setDynamicIconStyle] = useState(() => calculateIconPositionOnPath(0));
+  
+  // --- [تعديل 2] تمرير اللغة المبدئية عند التهيئة ---
+  const [dynamicIconStyle, setDynamicIconStyle] = useState(() => calculateIconPositionOnPath(0, initialLanguage || (I18nManager.isRTL ? 'ar' : 'en')));
+  
   const [progressPathD, setProgressPathD] = useState('');
   const pedometerSubscription = useRef(null);
   const animatedDistance = useRef(new Animated.Value(0)).current;
@@ -437,11 +440,12 @@ const DistanceScreen = (props) => {
 
   useEffect(() => { 
       const listenerId = animatedAngle.addListener(({ value }) => { 
-          setDynamicIconStyle(calculateIconPositionOnPath(value)); 
+          // --- [تعديل 3] تمرير اللغة الحالية لليسنر ---
+          setDynamicIconStyle(calculateIconPositionOnPath(value, language)); 
           setProgressPathD(value > 0.01 ? describeArc(CENTER_X, CENTER_Y, PATH_RADIUS, 0.01, value) : ''); 
       }); 
       return () => { animatedAngle.removeListener(listenerId); }; 
-  }, [animatedAngle]);
+  }, [animatedAngle, language]); // إضافة language كمصفوفة اعتماد
 
   useEffect(() => { Animated.timing(animatedDistance, { toValue: distanceForDisplay, duration: 750, useNativeDriver: false }).start(); }, [distanceForDisplay]);
   useEffect(() => { const listenerId = animatedDistance.addListener((v) => { setDisplayDistanceText(v.value.toLocaleString(locale, {minimumFractionDigits: 2, maximumFractionDigits: 2})); }); return () => { animatedDistance.removeListener(listenerId); }; }, [locale]);
