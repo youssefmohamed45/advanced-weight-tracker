@@ -51,10 +51,10 @@ const addDays = (date, days) => {
 
 // --- Theming ---
 const lightTheme = {
-    safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#757575', disabledChevron: '#e0e0e0', activeDayLabelColor: '#000000'
+    safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#2e7d32', disabledChevron: '#a5d6a7', activeDayLabelColor: '#000000'
 };
 const darkTheme = {
-    safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#A0A0A0', disabledChevron: '#424242', activeDayLabelColor: '#FFFFFF'
+    safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#E0E0E0', disabledChevron: '#555555', activeDayLabelColor: '#FFFFFF'
 };
 
 // =================================================================
@@ -178,17 +178,18 @@ const WeeklySteps = ({
             <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
                 <View style={styles.chartCard}>
                     {/* Header Navigator */}
-                    <View style={styles.dateNavigator}>
+                                        <View style={styles.dateNavigator}>
                          <TouchableOpacity onPress={onPreviousWeek}>
-                            <Ionicons name={I18nManager.isRTL ? "chevron-back-outline" : "chevron-forward-outline"} size={26} color={theme.chevron} />
+                            <Ionicons name={language === 'ar' ? "chevron-forward-outline" : "chevron-back-outline"} size={26} color={theme.chevron} />
                         </TouchableOpacity>
 
                         <Text style={styles.dateText}>{formattedDateRange}</Text>
 
                         <TouchableOpacity onPress={onNextWeek} disabled={isCurrentWeek}>
-                            <Ionicons name={I18nManager.isRTL ? "chevron-forward-outline" : "chevron-back-outline"} size={26} color={isCurrentWeek ? theme.disabledChevron : theme.chevron} />
+                            <Ionicons name={language === 'ar' ? "chevron-back-outline" : "chevron-forward-outline"} size={26} color={isCurrentWeek ? theme.disabledChevron : theme.chevron} />
                         </TouchableOpacity>
                     </View>
+
 
                     {/* Summary Boxes */}
                     <View style={styles.summaryContainer}>

@@ -1,8 +1,8 @@
-﻿// WeeklyTime.js (Fixed Layout & Infinite Scroll)
+﻿// WeeklyTime.js (الكود المعدّل)
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, // Changed from SafeAreaView
+  View,
   Text,
   StyleSheet,
   ScrollView,
@@ -22,8 +22,8 @@ import { useFocusEffect } from '@react-navigation/native';
 const translations = {
     ar: {
         headerTitle: "ملخص الاسبوع",
-        totalLabel: "الإجمالي (ساعات)",
-        avgLabel: "متوسط (ساعات)",
+        totalLabel: "الإجمالي",
+        avgLabel: "المتوسط",
         yAxisUnit: "دقائق",
         summaryTitle: "ملخص الاسبوع",
         caloriesLabel: "السعرات",
@@ -37,8 +37,8 @@ const translations = {
     },
     en: {
         headerTitle: "Weekly Summary",
-        totalLabel: "Total (hours)",
-        avgLabel: "Avg (hours)",
+        totalLabel: "Total",
+        avgLabel: "Avg",
         yAxisUnit: "minutes",
         summaryTitle: "Weekly Summary",
         caloriesLabel: "Calories",
@@ -53,18 +53,10 @@ const translations = {
 };
 
 const lightTheme = {
-    safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', 
-    iconCircleBg: 'rgba(76, 175, 80, 0.1)',
-    badgeBg: '#e0f2f1', badgeText: '#4caf50', chevron: '#bdbdbd', modalOverlay: 'rgba(0, 0, 0, 0.4)',
-    activeDayLabelColor: '#000000',
-    disabledChevron: '#e0e0e0',
+    safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#2e7d32', disabledChevron: '#a5d6a7', activeDayLabelColor: '#000000'
 };
 const darkTheme = {
-    safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', 
-    iconCircleBg: 'rgba(128, 203, 196, 0.1)',
-    badgeBg: '#333333', badgeText: '#80CBC4', chevron: '#A0A0A0', modalOverlay: 'rgba(0, 0, 0, 0.6)',
-    activeDayLabelColor: '#FFFFFF',
-    disabledChevron: '#424242',
+    safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#E0E0E0', disabledChevron: '#555555', activeDayLabelColor: '#FFFFFF'
 };
 
 // =================================================================
@@ -90,31 +82,28 @@ const NewMonthlyChart = ({ styles, data, todayIndex, onNextWeek, onPrevWeek, wee
     const yAxisLabels = useMemo(() => Array.from({ length: 5 }, (_, i) => (yAxisMax - (yAxisMax / 4) * i).toLocaleString(locale)), [yAxisMax, locale]);
     const getBarHeight = useCallback((value) => yAxisMax > 0 ? `${Math.min((value / yAxisMax) * 100, 100)}%` : '0%', [yAxisMax]);
 
-    const GoBackButton = (
-        <TouchableOpacity onPress={onPrevWeek}>
-            <Icon name="chevron-forward-outline" size={24} color={styles.chevron.color} />
-        </TouchableOpacity>
-    );
-
-    const GoForwardButton = (
-        <TouchableOpacity onPress={onNextWeek} disabled={isNextButtonDisabled} activeOpacity={0.7}>
-            <Icon name="chevron-back-outline" size={24} color={isNextButtonDisabled ? styles.disabledChevron.color : styles.chevron.color} />
-        </TouchableOpacity>
-    );
-
     return (
         <View style={styles.chartCard}>
-            <View>
-                <View style={styles.dateNavigator}>
-                  { language === 'ar' ? GoBackButton : GoForwardButton }
-                  <Text style={styles.dateText}>{weekDateRange.display}</Text>
-                  { language === 'ar' ? GoForwardButton : GoBackButton }
-                </View>
-                <View style={styles.summaryContainer}>
-                  <View style={styles.summaryBox}><Text style={styles.summaryValue}>{avgHours}</Text><Text style={styles.summaryLabel}>{translation.avgLabel}</Text></View>
-                  <View style={styles.summaryBox}><Text style={styles.summaryValue}>{totalHours}</Text><Text style={styles.summaryLabel}>{translation.totalLabel}</Text></View>
-                </View>
+            {/* ==================== START: تم تعديل الـ Header بالكامل ليتطابق مع الكود الثاني ==================== */}
+            <View style={styles.dateNavigator}>
+                <TouchableOpacity onPress={onPrevWeek}>
+                    <Icon name={language === 'ar' ? "chevron-forward-outline" : "chevron-back-outline"} size={26} color={styles.chevron.color} />
+                </TouchableOpacity>
+                <Text style={styles.dateText}>{weekDateRange.display}</Text>
+                <TouchableOpacity onPress={onNextWeek} disabled={isNextButtonDisabled}>
+                    <Icon name={language === 'ar' ? "chevron-back-outline" : "chevron-forward-outline"} size={26} color={isNextButtonDisabled ? styles.disabledChevron.color : styles.chevron.color} />
+                </TouchableOpacity>
             </View>
+            {/* ===================== END: نهاية تعديل الـ Header ===================== */}
+            
+<View style={styles.summaryContainer}>
+  {/* الإجمالي بقى مكتوب الأول */}
+  <View style={styles.summaryBox}><Text style={styles.summaryValue}>{totalHours}</Text><Text style={styles.summaryLabel}>{translation.totalLabel}</Text></View>
+  
+  {/* المتوسط بقى مكتوب بعده */}
+  <View style={styles.summaryBox}><Text style={styles.summaryValue}>{avgHours}</Text><Text style={styles.summaryLabel}>{translation.avgLabel}</Text></View>
+</View>
+            
             <Pressable style={styles.graphContainer} onPress={handleDismissTooltip}>
                 <View style={styles.yAxis}>{yAxisLabels.map((label, index) => <Text key={`y-${index}`} style={styles.yAxisLabel}>{label}</Text>)}</View>
                 <View style={styles.barsAreaWrapper}>
@@ -131,20 +120,23 @@ const NewMonthlyChart = ({ styles, data, todayIndex, onNextWeek, onPrevWeek, wee
         </View>
     );
 };
+
 const StatRow = ({label, value, styles}) => ( <View style={styles.summaryStatRow}><Text style={styles.summaryStatValue}>{value}</Text><Text style={styles.summaryStatLabel}>{label}</Text></View> );
+
 const MetricBlock = ({iconName, value, unit, styles}) => ( 
     <View style={styles.metricBlock}>
         <View style={styles.metricIconCircle}>
-            <Icon name={iconName} size={28} color={styles.metricIconCircle.iconColor} />
+            <Icon name={iconName} size={28} color={styles.metricIcon.color} />
         </View>
         <Text style={styles.metricValue}>{value}</Text>
         <Text style={styles.metricUnit}>{unit}</Text>
     </View> 
 );
+
 const ActivitySummary = ({ styles, totalCalories, trend, mostActiveTimeRange, totalSteps, totalKm, totalHours, translation }) => {
     return (
         <>
-            <Text style={styles.summaryHeaderTitle}>{translation.summaryTitle}</Text>
+            <Text style={styles.sectionTitle}>{translation.summaryTitle}</Text>
             <View style={styles.summaryMainCard}>
                 <StatRow label={translation.caloriesLabel} value={totalCalories} styles={styles}/>
                 <View style={styles.divider} />
@@ -228,11 +220,11 @@ const WeeklyTime = ({ language, isDarkMode }) => {
     setCurrentDate(nextWeekStart); 
   };
   
-  if (!memoizedData) { return ( <View style={styles.safeArea}><View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}><ActivityIndicator size="large" color={theme.mainText} /></View></View> ); }
+  if (!memoizedData) { return ( <View style={styles.container}><View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}><ActivityIndicator size="large" color={theme.mainText} /></View></View> ); }
   
   return (
-    <View style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.mainContainer}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
         <NewMonthlyChart 
             styles={styles} 
             data={memoizedData.weeklyData} 
@@ -256,38 +248,40 @@ const WeeklyTime = ({ language, isDarkMode }) => {
             totalHours={memoizedData.stats.totalHours}
             translation={translation}
         />
+        <View style={{ height: 30 }} />
       </ScrollView>
     </View>
   );
 };
 
-// Dynamic Stylesheet
+// =================================================================
+// START: تم تعديل الـ STYLES بالكامل لتتطابق مع الكود الثاني
+// =================================================================
 const getStyles = (theme, isRTL) => StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: theme.safeArea },
-    mainContainer: { padding: 15, paddingBottom: 50 },
+    container: { flex: 1, backgroundColor: theme.safeArea },
+    contentContainer: { padding: 15, paddingBottom: 50 },
     chartCard: { backgroundColor: theme.cardBackground, borderRadius: 20, marginBottom: 20, shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2, overflow: 'hidden' },
     dateNavigator: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15 },
-    dateText: { fontSize: 18, fontWeight: '600', color: theme.headerTitle },
+    dateText: { fontSize: 18, fontWeight: '600', color: theme.headerTitle, marginHorizontal: 10, textAlign: 'center' },
     chevron: { color: theme.chevron },
     disabledChevron: { color: theme.disabledChevron },
-    summaryContainer: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-around', paddingVertical: 20, paddingTop: 10 },
+    summaryContainer: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 20, paddingTop: 10, borderBottomWidth: 1, borderBottomColor: theme.separator, marginHorizontal: 20 },
     summaryBox: { alignItems: 'center', flex:1 },
     summaryValue: { fontSize: 32, fontWeight: 'bold', color: theme.mainText, fontVariant: ['tabular-nums'] },
     summaryLabel: { fontSize: 14, color: theme.secondaryText, marginTop: 4, textAlign:'center' },
     
-    // --- FIX IS HERE: FIXED HEIGHT ADDED ---
     graphContainer: { 
         flexDirection: isRTL ? 'row-reverse' : 'row', 
         paddingHorizontal: 15, 
-        paddingTop: 10, 
+        paddingTop: 30, 
         paddingBottom: 10, 
-        height: 300,  // <--- FIXED HEIGHT
+        height: 300,
         alignItems: 'stretch'
     },
     
-    yAxis: { width: 35, justifyContent: 'space-between', alignItems: 'flex-start', paddingLeft: isRTL ? 8 : 0, paddingRight: isRTL ? 0 : 8, height: '100%', paddingBottom: 25 },
+    yAxis: { width: 45, justifyContent: 'space-between', alignItems: 'flex-end', paddingRight: 8, height: '100%', paddingBottom: 25 },
     yAxisLabel: { fontSize: 11, color: theme.secondaryText, fontVariant: ['tabular-nums'] },
-    barsAreaWrapper: { flex: 1, [isRTL ? 'marginRight' : 'marginLeft']: 5 },
+    barsAreaWrapper: { flex: 1, marginLeft: 5 },
     barsArea: { flex: 1, borderBottomWidth: 1, borderBottomColor: theme.graphLine, position: 'relative', marginBottom: 25 },
     bars: { position: 'absolute', bottom: 0, left: 0, right: 0, top: 0, flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'flex-end' },
     barWrapper: { width: `${100 / 7}%`, height: '100%', justifyContent: 'flex-end', alignItems: 'center', position: 'relative' },
@@ -298,39 +292,25 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 20, flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'center' },
     xAxisLabel: { fontSize: 12, color: theme.secondaryText, textAlign: 'center', flex: 1 },
     activeXAxisLabel: { fontWeight: 'bold', color: theme.activeDayLabelColor },
-    tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, marginBottom: 5, left: '50%', transform: [{ translateX: -30 }] },
-    tooltipContainer: { backgroundColor: theme.tooltipBg, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10, minWidth: 60, alignItems: 'center' },
+    tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, width: 100 },
+    tooltipContainer: { backgroundColor: theme.tooltipBg, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10, minWidth: 65, alignItems: 'center' },
     tooltipText: { color: theme.tooltipText, fontSize: 12, fontWeight: 'bold' },
     tooltipPointer: { width: 0, height: 0, borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 6, borderStyle: 'solid', backgroundColor: 'transparent', borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: theme.tooltipBg, marginTop: -1 },
-    summaryHeaderTitle: { fontSize: 18, fontWeight: 'bold', color: theme.headerTitle, marginBottom: 15, width: '100%', textAlign: isRTL ? 'right' : 'left' },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: theme.headerTitle, marginBottom: 15, width: '100%', textAlign: isRTL ? 'left' : 'left', paddingHorizontal: 5 },
     summaryMainCard: { backgroundColor: theme.cardBackground, borderRadius: 15, padding: 20, width: '100%', marginBottom: 20 },
     summaryStatRow: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' },
-    summaryStatLabel: { fontSize: 16, color: theme.secondaryText },
-    summaryStatValue: { fontSize: 18, fontWeight: 'bold', color: theme.mainText, fontVariant: ['tabular-nums'] },
+    summaryStatLabel: { fontSize: 16, color: theme.secondaryText, textAlign: isRTL ? 'left' : 'right' },
+    summaryStatValue: { fontSize: 18, fontWeight: 'bold', color: theme.mainText, fontVariant: ['tabular-nums'], textAlign: isRTL ? 'right': 'left', flex: 1, marginHorizontal: 10 },
     divider: { height: 1, backgroundColor: theme.separator, marginVertical: 15 },
     metricsCard: { backgroundColor: theme.cardBackground, borderRadius: 15, paddingVertical: 20, width: '100%', flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'center' },
     metricBlock: { alignItems: 'center', flex: 1 },
-    metricIconCircle: { 
-        backgroundColor: theme.iconCircleBg, 
-        width: 60, 
-        height: 60, 
-        borderRadius: 30, 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        marginBottom: 12, 
-        iconColor: theme.icon 
-    },
-    metricValue: { 
-        fontSize: 22, 
-        fontWeight: 'bold', 
-        color: theme.mainText, 
-        fontVariant: ['tabular-nums'] 
-    },
-    metricUnit: { 
-        fontSize: 14, 
-        color: theme.secondaryText, 
-        marginTop: 2 
-    },
+    metricIconCircle: { backgroundColor: theme.iconCircleBg, width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+    metricIcon: { color: theme.icon },
+    metricValue: { fontSize: 22, fontWeight: 'bold', color: theme.mainText, fontVariant: ['tabular-nums'] },
+    metricUnit: { fontSize: 14, color: theme.secondaryText, marginTop: 2 },
 });
+// =================================================================
+// END: نهاية تعديل الـ STYLES
+// =================================================================
 
 export default WeeklyTime;

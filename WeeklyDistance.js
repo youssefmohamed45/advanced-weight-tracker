@@ -16,8 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 // --- Theme and Translation (Unchanged) ---
-const lightTheme = { safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#bdbdbd', disabledChevron: '#e0e0e0', activeDayLabelColor: '#000000' };
-const darkTheme = { safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#A0A0A0', disabledChevron: '#424242', activeDayLabelColor: '#FFFFFF'};
+const lightTheme = { safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#2e7d32', disabledChevron: '#a5d6a7', activeDayLabelColor: '#000000' };
+const darkTheme = { safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#E0E0E0', disabledChevron: '#555555', activeDayLabelColor: '#FFFFFF'};
 const translations = { ar: { kmUnit: 'كم', averageKm: 'متوسط (كم)', totalKm: 'الإجمالي (كم)', summaryTitle: 'ملخص الأسبوع', calories: 'السعرات', trend: 'الاتجاهات', mostActiveDay: 'اليوم الأكثر نشاطاً', steps: 'خطوة', hours: 'ساعات', trendHigh: 'مرتفع', trendLow: 'منخفض', trendStable: 'مستقر', loading: 'تحميل...', noData: '-', dayNamesShort: ['س', 'أ', 'ن', 'ث', 'ر', 'خ', 'ج'], dayNamesLong: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"], }, en: { kmUnit: 'km', averageKm: 'Avg (km)', totalKm: 'Total (km)', summaryTitle: 'Weekly Summary', calories: 'Calories', trend: 'Trend', mostActiveDay: 'Most Active Day', steps: 'Steps', hours: 'Hours', trendHigh: 'High', trendLow: 'Low', trendStable: 'Stable', loading: 'Loading...', noData: '-', dayNamesShort: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], dayNamesLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], } };
 
 // --- Constants & Helpers ---
@@ -32,7 +32,7 @@ const getStartOfWeek = (date, startOfWeekDay) => { const d = new Date(date); d.s
 // =================================================================
 // Sub-components
 // =================================================================
-const WeeklyChart = ({ styles, chartData, totalDistance, averageDistance, dateRange, onPreviousWeek, onNextWeek, isNextWeekDisabled, todayIndex, translation }) => {
+const WeeklyChart = ({ styles, chartData, totalDistance, averageDistance, dateRange, onPreviousWeek, onNextWeek, isNextWeekDisabled, todayIndex, translation, language }) => {
     const [selectedBarIndex, setSelectedBarIndex] = useState(null);
     const { yAxisLabels, yMax } = useMemo(() => { const dataMax = Math.max(...chartData, 1); const topValue = Math.ceil(dataMax / 5) * 5; const finalMax = Math.max(topValue, 5); const labels = []; for (let i = finalMax; i >= 0; i -= (finalMax / 4)) { labels.push(Math.round(i).toString()); } return { yAxisLabels: [...new Set(labels)], yMax: finalMax }; }, [chartData]);
     const getBarHeight = useCallback((value) => (yMax === 0 ? '0%' : `${Math.min((value / yMax) * 100, 100)}%`), [yMax]);
@@ -41,15 +41,25 @@ const WeeklyChart = ({ styles, chartData, totalDistance, averageDistance, dateRa
     const chartDayLabels = translation.dayNamesShort;
     const locale = I18nManager.isRTL ? 'ar-EG' : 'en-US';
 
-    const GoBackButton = (
+    // زر الرجوع للأسبوع السابق
+    const PreviousButton = (
         <TouchableOpacity onPress={onPreviousWeek}>
-            <Icon name="chevron-back-outline" size={24} color={styles.chevron.color} />
+            <Icon 
+                name={language === 'ar' ? "chevron-forward-outline" : "chevron-back-outline"} 
+                size={24} 
+                color={styles.chevron.color} 
+            />
         </TouchableOpacity>
     );
 
-    const GoForwardButton = (
+    // زر التقدم للأسبوع التالي
+    const NextButton = (
         <TouchableOpacity onPress={onNextWeek} disabled={isNextWeekDisabled}>
-            <Icon name="chevron-forward-outline" size={24} color={isNextWeekDisabled ? styles.disabledChevron.color : styles.chevron.color} />
+            <Icon 
+                name={language === 'ar' ? "chevron-back-outline" : "chevron-forward-outline"} 
+                size={24} 
+                color={isNextWeekDisabled ? styles.disabledChevron.color : styles.chevron.color} 
+            />
         </TouchableOpacity>
     );
 
@@ -57,9 +67,10 @@ const WeeklyChart = ({ styles, chartData, totalDistance, averageDistance, dateRa
         <View style={styles.chartCard}>
             <View>
                 <View style={styles.dateNavigator}>
-                    { I18nManager.isRTL ? GoBackButton : GoForwardButton }
+                    {/* السهم اللي بيرجع دايماً شمال، واللي بيقدم دايماً يمين */}
+                    {PreviousButton}
                     <Text style={styles.dateText}>{dateRange}</Text>
-                    { I18nManager.isRTL ? GoForwardButton : GoBackButton }
+                    {NextButton}
                 </View>
                 <View style={styles.summaryContainer}>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{averageDistance.toLocaleString(locale, {maximumFractionDigits: 1})}</Text><Text style={styles.summaryLabel}>{translation.averageKm}</Text></View>
@@ -185,7 +196,7 @@ const WeeklyDistance = ({ language = 'ar', isDarkMode = false }) => {
   return (
     <View style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.mainContainer}>
-        <WeeklyChart styles={styles} chartData={weeklyData.chartData} totalDistance={weeklyData.totalKm} averageDistance={weeklyData.averageKm} dateRange={weeklyData.dateRange} onPreviousWeek={handlePreviousWeek} onNextWeek={handleNextWeek} isNextWeekDisabled={weekOffset === 0} todayIndex={weeklyData.todayIndex} translation={translation} />
+<WeeklyChart styles={styles} chartData={weeklyData.chartData} totalDistance={weeklyData.totalKm} averageDistance={weeklyData.averageKm} dateRange={weeklyData.dateRange} onPreviousWeek={handlePreviousWeek} onNextWeek={handleNextWeek} isNextWeekDisabled={weekOffset === 0} todayIndex={weeklyData.todayIndex} translation={translation} language={language} />
         <ActivitySummary styles={styles} totalKm={weeklyData.totalKm} totalSteps={weeklyData.totalSteps} totalCalories={weeklyData.totalCalories} totalHours={weeklyData.totalHours} trend={weeklyData.trend} mostActiveTime={weeklyData.mostActiveTime} translation={translation} />
       </ScrollView>
     </View>

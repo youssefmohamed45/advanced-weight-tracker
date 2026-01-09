@@ -54,14 +54,14 @@ const translations = {
 const lightTheme = {
     safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#E0E0E0', activeBar: '#66bb6a', achievedBar: '#a5d6a7', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', 
     iconCircleBg: 'rgba(76, 175, 80, 0.1)', 
-    badgeBg: '#e0f2f1', badgeText: '#4caf50', chevron: '#bdbdbd',
-    disabledChevron: '#e0e0e0',
+    badgeBg: '#e0f2f1', badgeText: '#4caf50', chevron: '#2e7d32',
+    disabledChevron: '#a5d6a7',
 };
 const darkTheme = {
     safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#424242', activeBar: '#00796B', achievedBar: '#004D40', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', 
     iconCircleBg: 'rgba(128, 203, 196, 0.1)', 
-    badgeBg: '#333333', badgeText: '#80CBC4', chevron: '#A0A0A0',
-    disabledChevron: '#424242',
+    badgeBg: '#333333', badgeText: '#80CBC4', chevron: '#E0E0E0',
+    disabledChevron: '#555555',
 };
 // =================================================================
 // END: Translations and Theming
@@ -85,26 +85,33 @@ const MonthlyChart = ({ styles, onNextMonth, onPrevMonth, isNextButtonDisabled, 
     const handleBarPress = (index) => setSelectedBarIndex(prev => prev === index ? null : index);
     const handleDismissTooltip = () => setSelectedBarIndex(null);
 
-    const GoBackButton = (
-        <TouchableOpacity onPress={onPrevMonth}>
-            <Icon name="chevron-forward-outline" size={24} color={styles.chevron.color} />
-        </TouchableOpacity>
-    );
-
-    const GoForwardButton = (
-        <TouchableOpacity onPress={onNextMonth} disabled={isNextButtonDisabled} activeOpacity={0.7}>
-            <Icon name="chevron-back-outline" size={24} color={isNextButtonDisabled ? styles.disabledChevron.color : styles.chevron.color} />
-        </TouchableOpacity>
-    );
 
     return (
         <View style={styles.chartCard}>
             <View>
-                <View style={styles.dateNavigator}>
-                  { language === 'ar' ? GoForwardButton : GoBackButton }
-                  <Text style={styles.dateText}>{dateRangeDisplay}</Text>
-                  { language === 'ar' ? GoBackButton : GoForwardButton }
-                </View>
+<View style={styles.dateNavigator}>
+    {/* زر الرجوع (Previous) */}
+    <TouchableOpacity onPress={onPrevMonth}>
+        <Icon 
+            // هذا السطر هو مفتاح قلب السهم
+            name={language === 'ar' ? 'chevron-forward-outline' : 'chevron-back-outline'} 
+            size={24} 
+            color={styles.chevron.color} 
+        />
+    </TouchableOpacity>
+
+    <Text style={styles.dateText}>{dateRangeDisplay}</Text>
+
+    {/* زر التقدم (Next) */}
+    <TouchableOpacity onPress={onNextMonth} disabled={isNextButtonDisabled} activeOpacity={0.7}>
+        <Icon 
+            // وهذا السطر يقلب السهم الآخر
+            name={language === 'ar' ? 'chevron-back-outline' : 'chevron-forward-outline'} 
+            size={24} 
+            color={isNextButtonDisabled ? styles.disabledChevron.color : styles.chevron.color} 
+        />
+    </TouchableOpacity>
+</View>
                 <View style={styles.summaryContainer}>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{avgHours}</Text><Text style={styles.summaryLabel}>{translation.avgLabel}</Text></View>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{totalHours}</Text><Text style={styles.summaryLabel}>{translation.totalLabel}</Text></View>
@@ -251,7 +258,7 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: theme.safeArea },
     mainContainer: { padding: 15, paddingBottom: 50 },
     chartCard: { backgroundColor: theme.cardBackground, borderRadius: 20, marginBottom: 20, shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2, overflow: 'hidden' },
-    dateNavigator: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15 },
+    dateNavigator: { flexDirection: isRTL ? 'row' : 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15 },
     dateText: { fontSize: 18, fontWeight: '600', color: theme.headerTitle },
     chevron: { color: theme.chevron },
     disabledChevron: { color: theme.disabledChevron },

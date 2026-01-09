@@ -1,4 +1,4 @@
-﻿// WeeklyCaloriesScreen.js (نسخة قابلة للتحكم عبر Props مع سلوك الأسهم المطلوب وإصلاح المشكلة الرسومية)
+﻿// WeeklyCaloriesScreen.js (النسخة النهائية مع التعديلات المطلوبة)
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, // تم التغيير من SafeAreaView
@@ -84,7 +84,7 @@ const getStartOfWeek = (date, lang) => {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
     const day = d.getDay();
-    const startDay = lang === 'ar' ? 6 : 0;
+    const startDay = lang === 'ar' ? 6 : 0; // السبت في العربي، الأحد في الإنجليزي
     const diff = (day - startDay + 7) % 7;
     d.setDate(d.getDate() - diff);
     return d;
@@ -110,19 +110,55 @@ const WeeklyChart = ({ weeklyData, dateRange, styles, lang, onPrev, onNext, isNe
     return (
         <View style={styles.chartCard}>
              {/* خاصية flexDirection في هذا النمط ستتحكم بالترتيب تلقائياً */}
-            <View style={styles.dateNavigator}>
-                {/* هذا الزر دائمًا ينتقل للأسبوع التالي (أقرب لليوم) ويستخدم أيقونة السهم الأيسر */}
-                <TouchableOpacity onPress={onNext} disabled={isNextDisabled}>
-                    <Icon name="chevron-back-outline" size={24} color={isNextDisabled ? styles.arrowDisabled.color : styles.arrowColor.color} />
-                </TouchableOpacity>
+<View style={styles.dateNavigator}>
+    {/* 
+      الزر الأول (في اليسار)
+      - في العربي: يكون زر "التالي" ويشير للسهم لليسار.
+      - في الإنجليزي: يكون زر "السابق" ويشير للسهم لليسار.
+    */}
+    {language === 'ar' ? (
+        <TouchableOpacity onPress={onNext} disabled={isNextDisabled}>
+            <Icon 
+                name="chevron-back-outline" 
+                size={24} 
+                color={isNextDisabled ? styles.arrowDisabled.color : styles.arrowColor.color} 
+            />
+        </TouchableOpacity>
+    ) : (
+        <TouchableOpacity onPress={onPrev}>
+            <Icon 
+                name="chevron-back-outline" 
+                size={24} 
+                color={styles.arrowColor.color} 
+            />
+        </TouchableOpacity>
+    )}
 
-                <Text style={styles.dateText}>{dateRange}</Text>
+    <Text style={styles.dateText}>{dateRange}</Text>
 
-                {/* هذا الزر دائمًا يرجع للأسبوع السابق ويستخدم أيقونة السهم الأيمن */}
-                <TouchableOpacity onPress={onPrev}>
-                    <Icon name="chevron-forward-outline" size={24} color={styles.arrowColor.color} />
-                </TouchableOpacity>
-            </View>
+    {/* 
+      الزر الثاني (في اليمين)
+      - في العربي: يكون زر "السابق" ويشير للسهم لليمين.
+      - في الإنجليزي: يكون زر "التالي" ويشير للسهم لليمين.
+    */}
+    {language === 'ar' ? (
+        <TouchableOpacity onPress={onPrev}>
+            <Icon 
+                name="chevron-forward-outline" 
+                size={24} 
+                color={styles.arrowColor.color} 
+            />
+        </TouchableOpacity>
+    ) : (
+        <TouchableOpacity onPress={onNext} disabled={isNextDisabled}>
+            <Icon 
+                name="chevron-forward-outline" 
+                size={24} 
+                color={isNextDisabled ? styles.arrowDisabled.color : styles.arrowColor.color} 
+            />
+        </TouchableOpacity>
+    )}
+</View>
             <View style={styles.summaryContainer}>
                 <View style={styles.summaryBox}><Text style={styles.summaryValue}>{formatNumber(Math.round(avgCalories), language)}</Text><Text style={styles.summaryLabel}>{lang.averageKcal}</Text></View>
                 <View style={styles.summaryBox}><Text style={styles.summaryValue}>{formatNumber(Math.round(totalCalories), language)}</Text><Text style={styles.summaryLabel}>{lang.totalKcal}</Text></View>
@@ -250,7 +286,7 @@ const WeeklyCaloriesScreen = ({ language = 'ar', isDarkMode = false }) => {
     );
 };
 
-// --- الأنماط الديناميكية (مع التعديل على dateNavigator) ---
+// --- الأنماط الديناميكية (مع التعديلات المطلوبة) ---
 const getStyles = (theme, language) => StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: theme.safeArea },
     headerContainer: { paddingVertical: 15, paddingHorizontal: 20, alignItems: language === 'ar' ? 'flex-end' : 'flex-start' },
@@ -260,7 +296,6 @@ const getStyles = (theme, language) => StyleSheet.create({
     loadingText: { color: theme.secondaryText, marginTop: 10 },
     chartCard: { backgroundColor: theme.cardBackground, borderRadius: 20, marginBottom: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2, overflow: 'hidden' },
     dateNavigator: {
-        // هذا هو الجزء الأهم. الترتيب سيتغير تلقائيًا بناءً على اللغة
         flexDirection: language === 'ar' ? 'row-reverse' : 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -274,34 +309,64 @@ const getStyles = (theme, language) => StyleSheet.create({
     summaryValue: { fontSize: 32, fontWeight: 'bold', color: theme.mainText, fontVariant: ['tabular-nums'] },
     summaryLabel: { fontSize: 14, color: theme.secondaryText, marginTop: 4, textAlign: 'center' },
     
-    // --- FIX IS HERE: FIXED HEIGHT ADDED ---
+    // ==========================================================
+    // --- التعديل هنا: تم تثبيت اتجاه الرسم البياني من اليسار لليمين ---
+    // ==========================================================
     graphContainer: { 
-        flexDirection: language === 'ar' ? 'row-reverse' : 'row', 
+        flexDirection: 'row', // <<-- تعديل: تم إزالة الشرط وجعلها دائماً 'row'
         paddingHorizontal: 15, 
         paddingTop: 10, 
         paddingBottom: 10, 
-        height: 300, // <--- FIXED HEIGHT
+        height: 300,
         alignItems: 'stretch'
     },
     
-    yAxis: { width: 35, justifyContent: 'space-between', paddingLeft: language === 'ar' ? 8 : 0, paddingRight: language === 'ar' ? 0 : 8, height: '100%', paddingBottom: 25, alignItems: language === 'ar' ? 'flex-start' : 'flex-end' },
+    yAxis: { 
+        width: 35, 
+        justifyContent: 'space-between', 
+        paddingRight: 8, // <<-- تعديل: إزالة الشرط
+        height: '100%', 
+        paddingBottom: 25, 
+        alignItems: 'flex-end' // <<-- تعديل: إزالة الشرط
+    },
     yAxisLabel: { fontSize: 11, color: theme.secondaryText, fontVariant: ['tabular-nums'] },
     barsAreaWrapper: { flex: 1, marginHorizontal: 5 },
     barsArea: { flex: 1, borderBottomWidth: 1, borderBottomColor: theme.graphLine, position: 'relative', marginBottom: 25 },
-    bars: { position: 'absolute', bottom: 0, left: 0, right: 0, top: 0, flexDirection: language === 'ar' ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'flex-end' },
+    bars: { 
+        position: 'absolute', 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        top: 0, 
+        flexDirection: 'row', // <<-- تعديل: تم إزالة الشرط وجعلها دائماً 'row'
+        justifyContent: 'space-around', 
+        alignItems: 'flex-end' 
+    },
     barWrapper: { width: `${100 / 7}%`, height: '100%', justifyContent: 'flex-end', alignItems: 'center', position: 'relative' },
     bar: { width: 18, borderTopLeftRadius: 7, borderTopRightRadius: 7 },
     activeBar: { backgroundColor: theme.activeBar }, 
     todayBar: { backgroundColor: theme.todayBar },
     selectedBar: { backgroundColor: theme.selectedBar },
-    xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 20, flexDirection: language === 'ar' ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'center' },
+    xAxis: { 
+        position: 'absolute', 
+        bottom: -25, 
+        left: 0, 
+        right: 0, 
+        height: 20, 
+        flexDirection: 'row', // <<-- تعديل: تم إزالة الشرط وجعلها دائماً 'row'
+        justifyContent: 'space-around', 
+        alignItems: 'center' 
+    },
+    // ==========================================================
+    // --- نهاية منطقة التعديل ---
+    // ==========================================================
     xAxisLabel: { fontSize: 12, color: theme.secondaryText, textAlign: 'center', flex: 1 },
     todayXAxisLabel: { color: theme.todayText, fontWeight: 'bold' },
     tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, marginBottom: 5, left: '50%', transform: [{ translateX: -30 }] },
     tooltipContainer: { backgroundColor: theme.tooltipBg, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10, minWidth: 60, alignItems: 'center' },
     tooltipText: { color: theme.tooltipText, fontSize: 12, fontWeight: 'bold' },
     tooltipPointer: { width: 0, height: 0, borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 6, borderStyle: 'solid', backgroundColor: 'transparent', borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: theme.tooltipBg, marginTop: -1 },
-    summaryHeaderTitle: { fontSize: 18, fontWeight: 'bold', color: theme.headerText, marginBottom: 15, width: '100%', textAlign: language === 'ar' ? 'right' : 'left' },
+    summaryHeaderTitle: { fontSize: 18, fontWeight: 'bold', color: theme.headerText, marginBottom: 15, width: '100%', textAlign: language === 'ar' ? 'left' : 'right' },
     summaryMainCard: { backgroundColor: theme.cardBackground, borderRadius: 15, padding: 20, width: '100%', marginBottom: 20 },
     summaryStatRow: { flexDirection: language === 'ar' ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' },
     summaryStatLabel: { fontSize: 16, color: theme.secondaryText },

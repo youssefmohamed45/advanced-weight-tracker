@@ -16,8 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 // --- Theme and Translation ---
-const lightTheme = { safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#bdbdbd', disabledChevron: '#e0e0e0'};
-const darkTheme = { safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#A0A0A0', disabledChevron: '#424242'};
+const lightTheme = { safeArea: '#F7FDF9', cardBackground: '#FFFFFF', headerTitle: '#2e7d32', mainText: '#388e3c', secondaryText: '#757575', inactiveBar: '#c8e6c9', activeBar: '#66bb6a', achievedBar: '#4caf50', selectedBar: '#2E7D32', graphLine: '#eee', tooltipBg: '#333333', tooltipText: '#FFFFFF', shadowColor: '#000', separator: '#eee', icon: '#4caf50', iconCircleBg: 'rgba(76, 175, 80, 0.1)', chevron: '#2e7d32', disabledChevron: '#a5d6a7'};
+const darkTheme = { safeArea: '#121212', cardBackground: '#1E1E1E', headerTitle: '#E0E0E0', mainText: '#80CBC4', secondaryText: '#A0A0A0', inactiveBar: '#3E5052', activeBar: '#00796B', achievedBar: '#80CBC4', selectedBar: '#A7FFEB', graphLine: '#333333', tooltipBg: '#E0E0E0', tooltipText: '#121212', shadowColor: '#000', separator: '#424242', icon: '#80CBC4', iconCircleBg: 'rgba(128, 203, 196, 0.1)', chevron: '#E0E0E0', disabledChevron: '#555555'};
 const translations = { ar: { kmUnit: 'كم', dailyAverage: 'متوسط يومي', totalKm: 'الإجمالي (كم)', summaryTitle: 'ملخص الشهر', calories: 'السعرات', trend: 'الاتجاهات', mostActiveDay: 'اليوم الأكثر نشاطاً', steps: 'خطوة', hours: 'ساعات', trendHigh: 'مرتفع', trendLow: 'منخفض', trendStable: 'مستقر', loading: 'تحميل...', noData: '-', }, en: { kmUnit: 'km', dailyAverage: 'Daily Avg', totalKm: 'Total (km)', summaryTitle: 'Monthly Summary', calories: 'Calories', trend: 'Trend', mostActiveDay: 'Most Active Day', steps: 'Steps', hours: 'Hours', trendHigh: 'High', trendLow: 'Low', trendStable: 'Stable', loading: 'Loading...', noData: '-', } };
 
 // --- Constants & Helpers ---
@@ -46,26 +46,23 @@ const MonthlyChart = ({ styles, weeklyAggregates, totalDistance, averageDistance
     const handleBarPress = (index) => setSelectedBarIndex(prev => prev === index ? null : index);
     const handleDismissTooltip = () => setSelectedBarIndex(null);
 
-    const GoBackButton = (
-        <TouchableOpacity onPress={onPreviousMonth}>
-            <Icon name="chevron-back-outline" size={24} color={styles.chevron.color} />
-        </TouchableOpacity>
-    );
-
-    const GoForwardButton = (
-        <TouchableOpacity onPress={onNextMonth} disabled={isNextMonthDisabled}>
-            <Icon name="chevron-forward-outline" size={24} color={isNextMonthDisabled ? styles.disabledChevron.color : styles.chevron.color} />
-        </TouchableOpacity>
-    );
 
     return (
         <View style={styles.chartCard}>
             <View>
-                <View style={styles.dateNavigator}>
-                   { I18nManager.isRTL ? GoBackButton : GoForwardButton }
-                    <Text style={styles.dateText}>{dateRange}</Text>
-                   { I18nManager.isRTL ? GoForwardButton : GoBackButton }
-                </View>
+<View style={styles.dateNavigator}>
+    {/* زر الرجوع - دائمًا الأول في الكود */}
+    <TouchableOpacity onPress={onPreviousMonth}>
+        <Icon name="chevron-back-outline" size={24} color={styles.chevron.color} />
+    </TouchableOpacity>
+
+    <Text style={styles.dateText}>{dateRange}</Text>
+
+    {/* زر التقدم - دائمًا الأخير في الكود */}
+    <TouchableOpacity onPress={onNextMonth} disabled={isNextMonthDisabled}>
+        <Icon name="chevron-forward-outline" size={24} color={isNextMonthDisabled ? styles.disabledChevron.color : styles.chevron.color} />
+    </TouchableOpacity>
+</View>
                 <View style={styles.summaryContainer}>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{averageDistance.toLocaleString(locale, {maximumFractionDigits: 1})}</Text><Text style={styles.summaryLabel}>{translation.dailyAverage}</Text></View>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{totalDistance.toLocaleString(locale, {maximumFractionDigits: 1})}</Text><Text style={styles.summaryLabel}>{translation.totalKm}</Text></View>
@@ -233,7 +230,7 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: theme.safeArea },
     mainContainer: { padding: 15, paddingBottom: 50 },
     chartCard: { backgroundColor: theme.cardBackground, borderRadius: 20, marginBottom: 20, shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2, overflow: 'hidden' },
-    dateNavigator: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15 },
+    dateNavigator: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15 },
     dateText: { fontSize: 18, fontWeight: '600', color: theme.headerTitle, fontVariant: ['tabular-nums'], textAlign: 'center' },
     chevron: { color: theme.chevron },
     disabledChevron: { color: theme.disabledChevron },

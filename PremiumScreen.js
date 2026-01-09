@@ -348,7 +348,7 @@ const PremiumScreen = ({ language: propLanguage, darkMode: propDarkMode }) => {
         <View style={styles.headerContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleCloseOrBack}>
             <Ionicons 
-              name={route.params?.fromLogin ? 'close' : (I18nManager.isRTL ? 'arrow-forward' : 'arrow-back')} 
+              name={route.params?.fromLogin ? 'close' : (language === 'ar' ? 'arrow-forward' : 'arrow-back')} 
               size={route.params?.fromLogin ? 30 : 28}
               color={styles.headerTitle.color} 
             />

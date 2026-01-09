@@ -26,7 +26,8 @@ const lightTheme = {
     highlightColor: '#388e3c', barDefault: '#c8e6c9', barSelected: '#4CAF50',
     barInactive: '#e0e0e0', separatorColor: '#EEEEEE', graphLineColor: '#E0E0E0',
     iconBgColor: '#e0f2f1', tooltipBg: 'black', tooltipText: 'white',
-    loadingColor: '#e0e0e0', disabledColor: '#e0e0e0', shadowColor: '#000',
+    loadingColor: '#e0e0e0', disabledColor: '#e0e0e0', shadowColor: '#000', arrowColor: '#2e7d32', 
+    arrowDisabled: '#a5d6a7',
 };
 
 const darkTheme = {
@@ -323,15 +324,27 @@ const MonthlySteps = ({
          <ScrollView style={S.container} contentContainerStyle={S.contentContainer}>
             <View style={S.mainCardContainer}>
                 <View style={S.topSectionInsideCard}>
-                     <View style={S.dateNavigator}>
-                         <TouchableOpacity onPress={onNextMonth} disabled={isLoading || isCurrentMonth}>
-                            <Icon name="chevron-right" size={28} color={isLoading || isCurrentMonth ? theme.disabledColor : theme.secondaryText} />
-                         </TouchableOpacity>
-                         <Text style={S.dateText}>{displayDateRange}</Text>
-                         <TouchableOpacity onPress={onPreviousMonth} disabled={isLoading}>
-                            <Icon name="chevron-left" size={28} color={isLoading ? theme.disabledColor : theme.secondaryText} />
-                         </TouchableOpacity>
-                     </View>
+<View style={S.dateNavigator}>
+    {/* زر الشهر السابق (Previous) */}
+    <TouchableOpacity onPress={onPreviousMonth} disabled={isLoading}>
+        <Icon 
+            name={effectiveLang === 'ar' ? "chevron-right" : "chevron-left"} // <-- تم التعديل هنا
+            size={28} 
+            color={isLoading ? theme.arrowDisabled : theme.arrowColor} 
+        />
+    </TouchableOpacity>
+
+    <Text style={S.dateText}>{displayDateRange}</Text>
+
+    {/* زر الشهر التالي (Next) */}
+    <TouchableOpacity onPress={onNextMonth} disabled={isLoading || isCurrentMonth}>
+        <Icon 
+            name={effectiveLang === 'ar' ? "chevron-left" : "chevron-right"} // <-- تم التعديل هنا
+            size={28} 
+            color={isLoading || isCurrentMonth ? theme.arrowDisabled : theme.arrowColor} 
+        />
+    </TouchableOpacity>
+</View>
                      <View style={S.cardSeparator} />
                      <View style={S.summaryContainer}>
                         <View style={S.summaryBox}>

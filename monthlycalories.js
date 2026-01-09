@@ -107,35 +107,31 @@ const MonthlyChart = ({ aggregatedData, dateRange, total, average, styles, lang,
     const getBarHeight = useCallback((value) => `${Math.min((value / MAX_CHART_VALUE) * 100, 100)}%`, [MAX_CHART_VALUE]);
     const handleBarPress = (index) => setSelectedBarIndex(prev => prev === index ? null : index);
     
-    const PrevMonthButton = () => (
-        <TouchableOpacity onPress={onPrev}>
-            <Icon name="chevron-back-outline" size={24} color={styles.arrowColor.color} />
-        </TouchableOpacity>
-    );
-
-    const NextMonthButton = () => (
-        <TouchableOpacity onPress={onNext} disabled={isNextDisabled}>
-            <Icon name="chevron-forward-outline" size={24} color={isNextDisabled ? styles.arrowDisabled.color : styles.arrowColor.color} />
-        </TouchableOpacity>
-    );
 
     return (
         <View style={styles.chartCard}>
-            <View style={styles.dateNavigator}>
-                {language === 'ar' ? (
-                    <>
-                        <NextMonthButton />
-                        <Text style={styles.dateText}>{dateRange}</Text>
-                        <PrevMonthButton />
-                    </>
-                ) : (
-                    <>
-                        <NextMonthButton />
-                        <Text style={styles.dateText}>{dateRange}</Text>
-                        <PrevMonthButton />
-                    </>
-                )}
-            </View>
+<View style={styles.dateNavigator}>
+    {/* زر الرجوع للخلف */}
+    <TouchableOpacity onPress={onPrev}>
+        <Icon 
+            name={language === 'ar' ? "chevron-forward-outline" : "chevron-back-outline"} 
+            size={24} 
+            color={styles.arrowColor.color} 
+        />
+    </TouchableOpacity>
+
+    <Text style={styles.dateText}>{dateRange}</Text>
+
+    {/* زر التقدم للأمام */}
+    <TouchableOpacity onPress={onNext} disabled={isNextDisabled}>
+        <Icon 
+            name={language === 'ar' ? "chevron-back-outline" : "chevron-forward-outline"} 
+            size={24} 
+            color={isNextDisabled ? styles.arrowDisabled.color : styles.arrowColor.color} 
+        />
+    </TouchableOpacity>
+</View>
+
             <View style={styles.cardSeparator} />
             <View style={styles.summaryContainer}>
                 <View style={styles.summaryBox}><Text style={styles.summaryValue}>{formatNumber(Math.round(average), language)}</Text><Text style={styles.summaryLabel}>{lang.averageKcal}</Text></View>

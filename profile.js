@@ -235,8 +235,8 @@ const ProfileScreen = ({ navigation, language, darkMode, navigateToPremium, navi
   const currentThemeColors = currentThemeMode === 'dark' ? darkTheme : lightTheme;
   const profileImageSource = profileImageUri ? { uri: profileImageUri } : DEFAULT_PROFILE_ASSET;
   const imageKey = profileImageUri || 'default_asset';
-  const menuArrowIcon = I18nManager.isRTL ? "chevron-back-outline" : "chevron-forward-outline";
-  const headerBackIcon = I18nManager.isRTL ? "arrow-back-outline" : "arrow-back-outline";
+const menuArrowIcon = currentLanguage === 'ar' ? "chevron-back-outline" : "chevron-forward-outline";
+const headerBackIcon = currentLanguage === 'ar' ? "arrow-forward-outline" : "arrow-back-outline";
 
   if (!isInitialized) {
     return ( 
