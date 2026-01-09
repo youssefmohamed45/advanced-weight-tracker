@@ -136,8 +136,8 @@ const DailyStepsChart = React.memo(({ dailySteps = [], goalSteps = DEFAULT_GOAL,
     const [selectedBarValue, setSelectedBarValue] = useState(null);
     
     // --- تعديل الاتجاهات: row للإنجليزي (اليسار)، row-reverse للعربي (اليمين) ---
-    const chartDirection = language === 'ar' ? 'row-reverse' : 'row';
-    const headerAlign = language === 'ar' ? 'flex-end' : 'flex-start';
+    const chartDirection = language === 'ar' ? 'row' : 'row';
+    const headerAlign = language === 'ar' ? 'flex-start' : 'flex-start';
 
     const yAxisLabelsToDisplay = useMemo(() => {
         const actualData = Array.isArray(dailySteps) ? dailySteps : [];
@@ -618,7 +618,7 @@ const StepsScreen = (props) => {
     const navigateToAchievements = useCallback(() => { if (onNavigateToAchievements && typeof onNavigateToAchievements === 'function') { onNavigateToAchievements(currentSteps); } else { Alert.alert(translation.errorTitle, translation.cannotNavigateError); } }, [onNavigateToAchievements, currentSteps, translation]);
     
     const runnerImageSource = (isStepping && isViewingToday && !isRunnerVisuallyStopped) ? require('./assets/walking.gif') : require('./assets/walking.png');
-    const chartDayNamesForDayTab = useMemo(() => { return language === 'ar' ? ['س', 'خ', 'ر', 'ث', 'ن', 'أ', 'س']  : ['S', 'M', 'T', 'W', 'T', 'F', 'S']; }, [language]);
+    const chartDayNamesForDayTab = useMemo(() => { return language === 'ar' ? ['ج', 'خ', 'ر', 'ث', 'ن', 'أ', 'س']  : ['S', 'M', 'T', 'W', 'T', 'F', 'S']; }, [language]);
     const dayLabel = useMemo(() => formatDisplayDate(selectedDate, language, translation), [selectedDate, language, translation]);
     
     // تعديل ترتيب البيانات للرسم البياني اليومي

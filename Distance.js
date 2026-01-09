@@ -162,8 +162,8 @@ const DistanceWeeklyChart = ({ weeklyDistanceData, goalDistance, onTestIncrement
     // تعديل الاتجاهات:
     // الإنجليزي: row (من اليسار) والعنوان flex-start (يسار)
     // العربي: row-reverse (من اليمين) والعنوان flex-end (يمين)
-    const chartDirection = language === 'ar' ? 'row-reverse' : 'row';
-    const headerAlign = language === 'ar' ? 'flex-end' : 'flex-start';
+    const chartDirection = language === 'ar' ? 'row' : 'row';
+    const headerAlign = language === 'ar' ? 'flex-start' : 'flex-start';
 
     const { yAxisMax, yAxisLabels } = useMemo(() => { 
         const dataMax = Math.max(...weeklyDistanceData, goalDistance, 1); 
@@ -210,7 +210,7 @@ const DistanceWeeklyChart = ({ weeklyDistanceData, goalDistance, onTestIncrement
                 {/* تعديل الهامش بناءً على اللغة */}
                 <View style={[styles.chartContent, { [language === 'ar' ? 'marginRight' : 'marginLeft']: 10 }]}>
                     {/* تعديل اتجاه الأعمدة بناءً على اللغة */}
-                    <View style={[styles.barsAndLabelsContainer, { flexDirection: language === 'ar' ? 'row-reverse' : 'row' }]}>
+                    <View style={[styles.barsAndLabelsContainer, { flexDirection: language === 'ar' ? 'row' : 'row' }]}>
                         {days.map((dayName, index) => { 
                             const value = weeklyDistanceData[index] || 0; 
                             const barHeight = yAxisMax > 0 ? Math.min(CHART_HEIGHT, (value / yAxisMax) * CHART_HEIGHT) : 0; 

@@ -181,14 +181,16 @@ const AnimatedStatItem = React.memo(({ type, value, unit, styles, formatter }) =
 });
 
 // *** المكون المعدل: ActivityChart ***
+// *** المكون المعدل: ActivityChart ***
 const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, language, dayNames, title }) => { 
     const [tooltipVisible, setTooltipVisible] = useState(false); 
     const [selectedBarIndex, setSelectedBarIndex] = useState(null); 
     const [selectedBarValue, setSelectedBarValue] = useState(null); 
     
-    // --- تعديل الاتجاهات: row للإنجليزي (اليسار)، row-reverse للعربي (اليمين) ---
-    const chartDirection = language === 'ar' ? 'row-reverse' : 'row';
-    const headerAlign = language === 'ar' ? 'flex-end' : 'flex-start';
+    // التعديل هنا: نجعل الاتجاه الرئيسي دائماً 'row' لتبقى الأرقام على اليسار
+    // ولكن نحافظ على محاذاة العنوان
+   const chartDirection = language === 'ar' ? 'row' : 'row';
+    const headerAlign = language === 'ar' ? 'flex-start' : 'flex-start';
 
     const yAxisLabelsToDisplay = useMemo(() => { 
         const dataMax = Math.max(...(data || []).map(d => d || 0), 0);
@@ -233,6 +235,7 @@ const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, lang
             </View>
 
             <View style={[styles.chartContainer, { flexDirection: chartDirection }]}>
+                {/* الأرقام ستبقى دائماً في البداية (اليسار) */}
                 <View style={styles.yAxisContainer}>
                     {yAxisLabelsToDisplay.slice().reverse().map((labelValue, index) => (
                         <Text key={`y-${index}`} style={styles.yAxisLabel}>
@@ -241,9 +244,9 @@ const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, lang
                     ))}
                 </View>
 
-                {/* تعديل هوامش المحتوى الرئيسي حسب اللغة */}
-                <View style={[styles.mainChartArea, { [language === 'ar' ? 'marginRight' : 'marginLeft']: 5, marginRight: language === 'ar' ? 5 : 0, marginLeft: language === 'ar' ? 0 : 5 }]}>
-                    {/* تعديل اتجاه الأعمدة */}
+                {/* منطقة الرسم البياني */}
+<View style={[styles.mainChartArea, { [language === 'ar' ? 'marginRight' : 'marginLeft']: 10 }]}>
+                    {/* هنا نحافظ على عكس اتجاه الأعمدة في العربي ليكون السبت على اليمين */}
                     <View style={[styles.barsContainer, { flexDirection: language === 'ar' ? 'row-reverse' : 'row' }]}>
                         {dayNames.map((_, displayIndex) => { 
                             const dataIndex = displayIndex; 
@@ -271,8 +274,8 @@ const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, lang
                             ); 
                         })}
                     </View>
-                    {/* تعديل اتجاه أسماء الأيام */}
-                    <View style={[styles.xAxisContainer, { flexDirection: language === 'ar' ? 'row-reverse' : 'row' }]}>
+                    {/* هنا نحافظ على عكس اتجاه أسماء الأيام أيضاً */}
+                    <View style={[styles.xAxisContainer, { flexDirection: language === 'ar' ? 'row' : 'row' }]}>
                         {dayNames.map((day, displayIndex) => (
                             <View key={`x-${displayIndex}`} style={styles.dayLabelWrapper}>
                                 <Text style={[ styles.xAxisLabel, (displayIndex === displayDayIndex || (selectedBarIndex !== null && displayIndex === selectedBarIndex)) && styles.xAxisLabelToday ]}>
@@ -286,7 +289,6 @@ const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, lang
         </Pressable> 
     ); 
 });
-
 const CaloriesScreen = (props) => {
     const { onNavigate, currentScreenName, onNavigateToAchievements, language: initialLanguage, isDarkMode: initialIsDarkMode } = props;
     
