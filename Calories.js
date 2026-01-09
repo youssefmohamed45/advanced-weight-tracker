@@ -33,7 +33,7 @@ const STEPS_PER_MINUTE = 100;
 const CHART_HEIGHT = 150;
 const BAR_CONTAINER_HEIGHT = CHART_HEIGHT;
 const X_AXIS_HEIGHT = 30;
-const Y_AXIS_WIDTH = 35; 
+const Y_AXIS_WIDTH = 15; 
 const BAR_WIDTH = 12;
 const BAR_SPACING = 18;
 const TOOLTIP_ARROW_HEIGHT = 6;
@@ -248,7 +248,7 @@ const ActivityChart = React.memo(({ data = [], goal = DEFAULT_GOAL, styles, lang
                 </View>
 
                 {/* منطقة الرسم البياني */}
-<View style={[styles.mainChartArea, { [language === 'ar' ? 'marginRight' : 'marginLeft']: 10 }]}>
+<View style={[styles.mainChartArea, { [language === 'ar' ? 'marginRight' : 'marginLeft']: 0 }]}>
                     {/* هنا نحافظ على عكس اتجاه الأعمدة في العربي ليكون السبت على اليمين */}
                     <View style={[styles.barsContainer, { flexDirection: language === 'ar' ? 'row-reverse' : 'row' }]}>
                         {dayNames.map((_, displayIndex) => { 
