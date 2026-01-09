@@ -271,15 +271,15 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     summaryLabel: { fontSize: 14, color: theme.secondaryText, marginTop: 4, textAlign:'center' },
     
     graphContainer: { 
-        flexDirection: isRTL ? 'row-reverse' : 'row', 
-        paddingHorizontal: 15, 
+        flexDirection: isRTL ? 'row' : 'row', 
+        paddingHorizontal: isRTL ? 0 : 0,
         paddingTop: 30, 
         paddingBottom: 10, 
         height: 300,
         alignItems: 'stretch'
     },
     
-    yAxis: { width: 45, justifyContent: 'space-between', alignItems: 'flex-end', paddingRight: 8, height: '100%', paddingBottom: 25 },
+    yAxis: { width: 45, justifyContent: 'space-between', alignItems: 'flex-end', paddingRight: isRTL ? 15 : 15, height: '100%', paddingBottom: 25 },
     yAxisLabel: { fontSize: 11, color: theme.secondaryText, fontVariant: ['tabular-nums'] },
     barsAreaWrapper: { flex: 1, marginLeft: 5 },
     barsArea: { flex: 1, borderBottomWidth: 1, borderBottomColor: theme.graphLine, position: 'relative', marginBottom: 25 },
@@ -289,7 +289,7 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     achievedBar: { backgroundColor: theme.inactiveBar }, 
     activeBar: { backgroundColor: theme.activeBar },
     selectedBar: { backgroundColor: theme.selectedBar }, 
-    xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 20, flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'center' },
+    xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 20, flexDirection: isRTL ? 'row' : 'row', justifyContent: 'space-around', alignItems: 'center' },
     xAxisLabel: { fontSize: 12, color: theme.secondaryText, textAlign: 'center', flex: 1 },
     activeXAxisLabel: { fontWeight: 'bold', color: theme.activeDayLabelColor },
     tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, width: 100 },

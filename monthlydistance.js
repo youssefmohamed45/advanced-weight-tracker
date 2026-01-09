@@ -28,9 +28,9 @@ const getDateString = (date) => { if (!date || !(date instanceof Date)) return n
 // =================================================================
 // Sub-components
 // =================================================================
-const MonthlyChart = ({ styles, weeklyAggregates, totalDistance, averageDistance, dateRange, onPreviousMonth, onNextMonth, isNextMonthDisabled, translation }) => {
+const MonthlyChart = ({ styles, weeklyAggregates, totalDistance, averageDistance, dateRange, onPreviousMonth, onNextMonth, isNextMonthDisabled, translation, language }) => {
     const [selectedBarIndex, setSelectedBarIndex] = useState(null);
-    const locale = I18nManager.isRTL ? 'ar-EG' : 'en-US';
+    const locale = language === 'ar' ? 'ar-EG' : 'en-US'; // استخدام اللغة الممررة بدلاً من I18nManager
 
     const { yAxisLabels, yMax } = useMemo(() => {
         const weeklyTotals = weeklyAggregates.map(w => w.value);
@@ -46,23 +46,26 @@ const MonthlyChart = ({ styles, weeklyAggregates, totalDistance, averageDistance
     const handleBarPress = (index) => setSelectedBarIndex(prev => prev === index ? null : index);
     const handleDismissTooltip = () => setSelectedBarIndex(null);
 
+    // تحديد اتجاه السهم بناءً على اللغة فقط
+    const prevIcon = language === 'ar' ? "chevron-forward-outline" : "chevron-back-outline";
+    const nextIcon = language === 'ar' ? "chevron-back-outline" : "chevron-forward-outline";
 
     return (
         <View style={styles.chartCard}>
             <View>
-<View style={styles.dateNavigator}>
-    {/* زر الرجوع - دائمًا الأول في الكود */}
-    <TouchableOpacity onPress={onPreviousMonth}>
-        <Icon name="chevron-back-outline" size={24} color={styles.chevron.color} />
-    </TouchableOpacity>
+                <View style={styles.dateNavigator}>
+                    {/* زر الشهر السابق */}
+                    <TouchableOpacity onPress={onPreviousMonth}>
+                        <Icon name={prevIcon} size={24} color={styles.chevron.color} />
+                    </TouchableOpacity>
 
-    <Text style={styles.dateText}>{dateRange}</Text>
+                    <Text style={styles.dateText}>{dateRange}</Text>
 
-    {/* زر التقدم - دائمًا الأخير في الكود */}
-    <TouchableOpacity onPress={onNextMonth} disabled={isNextMonthDisabled}>
-        <Icon name="chevron-forward-outline" size={24} color={isNextMonthDisabled ? styles.disabledChevron.color : styles.chevron.color} />
-    </TouchableOpacity>
-</View>
+                    {/* زر الشهر التالي */}
+                    <TouchableOpacity onPress={onNextMonth} disabled={isNextMonthDisabled}>
+                        <Icon name={nextIcon} size={24} color={isNextMonthDisabled ? styles.disabledChevron.color : styles.chevron.color} />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.summaryContainer}>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{averageDistance.toLocaleString(locale, {maximumFractionDigits: 1})}</Text><Text style={styles.summaryLabel}>{translation.dailyAverage}</Text></View>
                     <View style={styles.summaryBox}><Text style={styles.summaryValue}>{totalDistance.toLocaleString(locale, {maximumFractionDigits: 1})}</Text><Text style={styles.summaryLabel}>{translation.totalKm}</Text></View>
@@ -216,7 +219,18 @@ const MonthlyDistance = ({ language = 'ar', isDarkMode = false }) => {
   return ( 
     <View style={styles.safeArea}> 
         <ScrollView contentContainerStyle={styles.mainContainer}> 
-            <MonthlyChart styles={styles} weeklyAggregates={monthlyData.weeklyAggregates} totalDistance={monthlyData.totalKm} averageDistance={monthlyData.averageKm} dateRange={monthlyData.dateRange} onPreviousMonth={handlePreviousMonth} onNextMonth={handleNextMonth} isNextMonthDisabled={monthOffset === 0} translation={translation}/> 
+<MonthlyChart 
+    styles={styles} 
+    weeklyAggregates={monthlyData.weeklyAggregates} 
+    totalDistance={monthlyData.totalKm} 
+    averageDistance={monthlyData.averageKm} 
+    dateRange={monthlyData.dateRange} 
+    onPreviousMonth={handlePreviousMonth} 
+    onNextMonth={handleNextMonth} 
+    isNextMonthDisabled={monthOffset === 0} 
+    translation={translation}
+    language={language}  // <--- أضف هذا السطر ضروري جداً
+/>
             <ActivitySummary styles={styles} totalKm={monthlyData.totalKm} totalSteps={monthlyData.totalSteps} totalCalories={monthlyData.totalCalories} totalHours={monthlyData.totalHours} trend={monthlyData.trend} mostActiveTime={monthlyData.mostActiveTime} translation={translation} /> 
         </ScrollView> 
     </View> 

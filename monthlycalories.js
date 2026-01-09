@@ -376,7 +376,7 @@ const getStyles = (theme, language) => StyleSheet.create({
     selectedBar: { backgroundColor: theme.selectedBar, minHeight: 2, },
     xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 20, flexDirection: language === 'ar' ? 'row-reverse' : 'row', justifyContent: 'space-around', alignItems: 'center', paddingHorizontal: '2%' },
     xAxisLabel: { fontSize: 11, color: theme.secondaryText, textAlign: 'center', flex:1, fontWeight: '500' },
-    tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, marginBottom: 5, left: '50%', transform: [{ translateX: -45 }] },
+    tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, marginBottom: 5, left: '50%', marginLeft: -45,  },
     tooltipContainer: { backgroundColor: theme.tooltipBg, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12, minWidth: 90, alignItems: 'center' },
     tooltipValueText: { color: theme.tooltipText, fontSize: 13, fontWeight: 'bold'},
     tooltipPointer: { width: 0, height: 0, borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 6, borderStyle: 'solid', backgroundColor: 'transparent', borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: theme.tooltipBg, marginTop: -1 },

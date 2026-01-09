@@ -269,7 +269,7 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     
     // --- FIX IS HERE: FIXED HEIGHT ADDED ---
     graphContainer: { 
-        flexDirection: isRTL ? 'row-reverse' : 'row', 
+        flexDirection: isRTL ? 'row' : 'row', 
         paddingHorizontal: 15, 
         paddingTop: 10, 
         paddingBottom: 10, 
@@ -288,10 +288,10 @@ const getStyles = (theme, isRTL) => StyleSheet.create({
     activeBar: { backgroundColor: theme.activeBar },
     selectedBar: { backgroundColor: theme.selectedBar }, 
     inactiveBar: { backgroundColor: theme.inactiveBar },
-    xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 25, flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-around', paddingHorizontal: 5 },
+    xAxis: { position: 'absolute', bottom: -25, left: 0, right: 0, height: 25, flexDirection: isRTL ? 'row' : 'row', justifyContent: 'space-around', paddingHorizontal: 5 },
     xAxisLabelWrapper: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     xAxisLabel: { fontSize: 11, color: theme.secondaryText, textAlign: 'center' },
-    tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, marginBottom: 5, left: '50%', transform: [{ translateX: -30 }] },
+    tooltipPositioner: { position: 'absolute', alignItems: 'center', zIndex: 10, marginBottom: 5, left: '50%', marginLeft: -30, },
     tooltipContainer: { backgroundColor: theme.tooltipBg, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10, minWidth: 60, alignItems: 'center' },
     tooltipText: { color: theme.tooltipText, fontSize: 12, fontWeight: 'bold', fontVariant: ['tabular-nums'] },
     tooltipPointer: { width: 0, height: 0, borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 6, borderStyle: 'solid', backgroundColor: 'transparent', borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: theme.tooltipBg, marginTop: -1 },

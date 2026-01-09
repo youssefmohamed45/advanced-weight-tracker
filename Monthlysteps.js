@@ -574,7 +574,7 @@ const styles = (theme) => StyleSheet.create({
         flex: 1, fontVariant: ['tabular-nums'],
     },
     tooltipPositioner: {
-        position: 'absolute', left: '50%', transform: [{ translateX: -(TOOLTIP_WIDTH / 2) }],
+        position: 'absolute', left: '50%',  marginLeft: -(TOOLTIP_WIDTH / 2), 
         alignItems: 'center', zIndex: 10,
         elevation: Platform.OS === 'android' ? 3 : undefined,
         minWidth: TOOLTIP_WIDTH, width: TOOLTIP_WIDTH, pointerEvents: 'none',
