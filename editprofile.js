@@ -22,16 +22,16 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-import defaultAvatar from './assets/profile.png'; // Ensure this path is correct
+import defaultAvatar from './assets/profile.png'; 
 
-// --- Constants (No changes) ---
+// --- Constants ---
 const PRIMARY_GREEN_COLOR_LIGHT = '#4CAF50';
 const PRIMARY_GREEN_COLOR_DARK = '#2E7D32';
 const LOGGED_IN_EMAIL_KEY = 'loggedInUserEmail';
 const USER_PROFILE_DATA_KEY = '@Profile:userProfileData';
 const DEFAULT_PROFILE_IMAGE = defaultAvatar;
 
-// --- Translation Dictionary (No changes) ---
+// --- Translation Dictionary ---
 const translations = {
   ar: {
     editProfileTitle: 'تعديل الملف الشخصي',
@@ -40,7 +40,8 @@ const translations = {
     usernameLabel: 'اسم المستخدم:',
     usernamePlaceholder: 'أدخل اسم المستخدم الخاص بك',
     emailLabel: 'البريد الإلكتروني:',
-    emailReadOnlyInfo: 'لا يمكن تغيير عنوان البريد الإلكتروني.',
+    emailPlaceholder: 'أدخل بريدك الإلكتروني',
+    emailLocked: '(لا يمكن تغيير إيميل الحساب المسجل)', // رسالة توضيح
     phoneLabel: 'رقم الهاتف:',
     phonePlaceholder: 'أدخل رقم هاتفك',
     genderLabel: 'الجنس:',
@@ -72,7 +73,8 @@ const translations = {
     usernameLabel: 'Username:',
     usernamePlaceholder: 'Enter your username',
     emailLabel: 'Email:',
-    emailReadOnlyInfo: 'Email address cannot be changed.',
+    emailPlaceholder: 'Enter your email',
+    emailLocked: '(Registered account email cannot be changed)',
     phoneLabel: 'Phone:',
     phonePlaceholder: 'Enter your phone number',
     genderLabel: 'Gender:',
@@ -99,7 +101,7 @@ const translations = {
   }
 };
 
-// --- Styles (No changes) ---
+// --- Styles ---
 const baseStyles = StyleSheet.create({
     safeArea: { flex: 1, },
     loadingContainer: { flex:1, justifyContent: 'center', alignItems: 'center', },
@@ -126,6 +128,8 @@ const baseStyles = StyleSheet.create({
     separatorAfterPicker: { height: 1, marginTop: Platform.OS === 'ios' ? 0 : -5, },
     datePickerTouchable: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height: 45, paddingVertical: 0, },
     dateIconPosition: { marginLeft: 10, },
+    // ستايل جديد للحقل المقفل
+    disabledInput: { opacity: 0.5, backgroundColor: '#f0f0f030' }
 });
 const lightStyles = StyleSheet.create({
     safeArea: { backgroundColor: PRIMARY_GREEN_COLOR_LIGHT }, loadingText: { color: '#4A5568' }, header: { backgroundColor: PRIMARY_GREEN_COLOR_LIGHT }, headerContent: { color: '#FFFFFF' }, scrollView: { backgroundColor: '#F7FAFC' }, profilePicSection: { backgroundColor: PRIMARY_GREEN_COLOR_LIGHT }, profilePic: { backgroundColor: '#E2E8F0' }, cameraIconContainer: { backgroundColor: PRIMARY_GREEN_COLOR_LIGHT }, detailsSection: { backgroundColor: '#FFFFFF' }, fieldLabel: { color: '#718096' }, textInput: { color: '#1A202C', borderBottomColor: '#E2E8F0' }, staticFieldValue: { color: '#1A202C' }, placeholderText: { color: '#A0AEC0' }, pickerContainer: { borderBottomColor: '#E2E8F0' }, picker: { color: '#1A202C' }, pickerDropdownIcon: { color: '#888888' }, iosPickerItem: { color: '#1A202C' }, separator: { backgroundColor: '#E2E8F0' }, separatorAfterPicker: { backgroundColor: '#E2E8F0' }, dateIcon: { color: '#888888' },
@@ -135,7 +139,6 @@ const darkStyles = StyleSheet.create({
     safeArea: { backgroundColor: PRIMARY_GREEN_COLOR_DARK }, loadingText: { color: '#E0E0E0' }, header: { backgroundColor: PRIMARY_GREEN_COLOR_DARK }, headerContent: { color: '#FFFFFF' }, scrollView: { backgroundColor: '#121212' }, profilePicSection: { backgroundColor: PRIMARY_GREEN_COLOR_DARK }, profilePic: { backgroundColor: '#555555' }, cameraIconContainer: { backgroundColor: PRIMARY_GREEN_COLOR_DARK }, detailsSection: { backgroundColor: '#1E1E1E' }, fieldLabel: { color: '#A0AEC0' }, textInput: { color: '#E0E0E0', borderBottomColor: '#444444' }, staticFieldValue: { color: '#E0E0E0' }, placeholderText: { color: '#718096' }, pickerContainer: { borderBottomColor: '#444444' }, picker: { color: '#E0E0E0' }, pickerDropdownIcon: { color: '#BBBBBB' }, iosPickerItem: { color: '#E0E0E0' }, separator: { backgroundColor: '#444444' }, separatorAfterPicker: { backgroundColor: '#444444' }, dateIcon: { color: '#BBBBBB' },
     activityIndicator: { color: '#FFFFFF' },
 });
-
 
 // --- Component Definition ---
 const EditProfileScreen = ({
@@ -150,8 +153,10 @@ const EditProfileScreen = ({
     const [profileData, setProfileData] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
+    
+    // متغير جديد لتحديد هل الحقل قابل للتعديل أم لا
+    const [isEmailEditable, setIsEmailEditable] = useState(true);
 
-    // ... (All other hooks and functions up to handleSaveChanges remain the same) ...
     useEffect(() => {
         if (languageProp && languageProp !== currentLanguage) {
             setCurrentLanguage(languageProp);
@@ -179,17 +184,29 @@ const EditProfileScreen = ({
         let loadedEmail = '';
         let loadedProfile = {};
         try {
+            // التحقق من وجود إيميل تسجيل دخول حقيقي
             const storedEmail = await AsyncStorage.getItem(LOGGED_IN_EMAIL_KEY);
             loadedEmail = storedEmail || '';
+            
+            // إذا كان هناك إيميل محفوظ في مفتاح تسجيل الدخول، فهذا يعني أن المستخدم مسجل
+            // وبالتالي نمنع تعديل الإيميل
+            if (storedEmail && storedEmail.length > 0) {
+                setIsEmailEditable(false);
+            } else {
+                setIsEmailEditable(true);
+            }
+
             const profileDataString = await AsyncStorage.getItem(USER_PROFILE_DATA_KEY);
             if (profileDataString) {
                 loadedProfile = JSON.parse(profileDataString);
             }
             const dobFromStorage = loadedProfile?.dateOfBirth ? new Date(loadedProfile.dateOfBirth) : new Date();
             const validDob = (dobFromStorage instanceof Date && !isNaN(dobFromStorage)) ? dobFromStorage : new Date();
+            
             setProfileData({
                 username: loadedProfile?.username || '',
-                email: loadedEmail,
+                // الأولوية لإيميل تسجيل الدخول، ثم الإيميل المحفوظ في البروفايل يدوياً
+                email: loadedEmail || loadedProfile?.email || '', 
                 phone: loadedProfile?.phone || '',
                 gender: loadedProfile?.gender || 'Male',
                 dateOfBirth: validDob,
@@ -198,7 +215,7 @@ const EditProfileScreen = ({
         } catch (error) {
             console.error('EditProfileScreen: Error loading profile form data:', error);
             Alert.alert(localTranslation.saveErrorTitle, localTranslation.failedToLoadDetails);
-            setProfileData({ username: '', email: loadedEmail, phone: '', gender: 'Male', dateOfBirth: new Date(), profileImageUrl: null, });
+            setProfileData({ username: '', email: '', phone: '', gender: 'Male', dateOfBirth: new Date(), profileImageUrl: null, });
         } finally {
             setIsInitialized(true);
         }
@@ -207,9 +224,9 @@ const EditProfileScreen = ({
     useFocusEffect(useCallback(() => { loadProfileFormData(); }, [loadProfileFormData]));
     
     const updateProfileField = (field, value) => {
-        if (field === 'email') { Alert.alert(translation.infoTitle, translation.emailReadOnlyInfo); return; }
         setProfileData(prev => prev ? ({ ...prev, [field]: value }) : null);
     };
+
     const updatePhoneField = (text) => { updateProfileField('phone', text.replace(/[^0-9]/g, '')); };
     const onDateChange = (event, selectedDate) => {
         const currentDate = selectedDate || (profileData ? profileData.dateOfBirth : new Date());
@@ -245,13 +262,13 @@ const EditProfileScreen = ({
     };
     const handleGoBack = () => { if (navigation.canGoBack()) { navigation.goBack(); } };
 
-
-    // START: MODIFICATION - Simplified handleSaveChanges function
     const handleSaveChanges = async () => {
         if (!profileData) return;
         try {
           const profileDataToSave = {
             username: profileData.username?.trim() || null,
+            // حفظ الإيميل فقط إذا كان المستخدم زائراً، لو مسجل الإيميل محفوظ أصلاً في LOGGED_IN_EMAIL_KEY
+            email: isEmailEditable ? (profileData.email?.trim() || null) : profileData.email,
             phone: profileData.phone || null,
             gender: profileData.gender || 'Male',
             dateOfBirth: (profileData.dateOfBirth instanceof Date && !isNaN(profileData.dateOfBirth))
@@ -262,23 +279,24 @@ const EditProfileScreen = ({
 
           // 1. Save data to AsyncStorage
           await AsyncStorage.setItem(USER_PROFILE_DATA_KEY, JSON.stringify(profileDataToSave));
+          
+          // تحديث مفتاح الإيميل فقط لو كان المستخدم زائراً
+          if (isEmailEditable && profileData.email) {
+             // تنبيه: هنا نحفظه كأنه إيميل لوكال، لكن لا نعتبره تسجيل دخول كامل
+             // يمكن تجاهل حفظه في LOGGED_IN_EMAIL_KEY لكي لا يعتقد التطبيق أنه مسجل دخول
+          }
 
-          // 2. Call the onSaveSuccess prop if it exists
           if (onSaveSuccess) {
             onSaveSuccess(profileDataToSave);
           }
           
-          // 3. Navigate directly to the Profile screen without an alert
           navigation.navigate('Profile');
 
         } catch (error) {
-          // If saving fails, show an error alert
           Alert.alert(translation.saveErrorTitle, translation.saveErrorMessage);
         }
     };
-    // END: MODIFICATION
 
-    // --- JSX (No other changes below this point) ---
     if (!isInitialized || !profileData) {
         const loadingTheme = currentDarkMode ? darkStyles : lightStyles;
         return (
@@ -299,10 +317,10 @@ const EditProfileScreen = ({
             <View style={[baseStyles.header, themeStyles.header]}>
                 <TouchableOpacity onPress={handleGoBack} style={baseStyles.headerButton}>
                     <Icon 
-    name={currentLanguage === 'ar' ? "arrow-forward" : "arrow-back"} 
-    size={24} 
-    color={themeStyles.headerContent.color} 
-/>
+                        name={currentLanguage === 'ar' ? "arrow-forward" : "arrow-back"} 
+                        size={24} 
+                        color={themeStyles.headerContent.color} 
+                    />
                 </TouchableOpacity>
                 <Text style={[baseStyles.headerTitle, themeStyles.headerContent]}>{translation.editProfileTitle}</Text>
                 <TouchableOpacity onPress={handleSaveChanges} style={baseStyles.headerButton}>
@@ -347,12 +365,30 @@ const EditProfileScreen = ({
                         />
                     </View>
 
+                    {/* --- حقل الإيميل الذكي --- */}
                     <View style={baseStyles.fieldContainer}>
                         <Text style={[baseStyles.fieldLabel, themeStyles.fieldLabel]}>{translation.emailLabel}</Text>
-                        <Text style={[baseStyles.staticFieldValue, themeStyles.staticFieldValue, {textAlign: I18nManager.isRTL ? 'right' : 'left'}]}>
-                            {profileData.email || translation.loading}
-                        </Text>
-                        <View style={[baseStyles.separator, themeStyles.separator]} />
+                        <TextInput
+                            style={[
+                                baseStyles.textInput, 
+                                themeStyles.textInput, 
+                                {textAlign: I18nManager.isRTL ? 'right' : 'left'},
+                                !isEmailEditable && baseStyles.disabledInput // تغيير الشكل لو مقفول
+                            ]}
+                            value={profileData.email}
+                            onChangeText={(text) => updateProfileField('email', text)}
+                            placeholder={translation.emailPlaceholder}
+                            placeholderTextColor={themeStyles.placeholderText.color}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            editable={isEmailEditable} // قفل الكتابة لو مسجل
+                        />
+                        {/* رسالة توضيحية تظهر فقط للمسجلين */}
+                        {!isEmailEditable && (
+                            <Text style={{ fontSize: 12, color: '#888', marginTop: 5, textAlign: I18nManager.isRTL ? 'right' : 'left' }}>
+                                {translation.emailLocked}
+                            </Text>
+                        )}
                     </View>
 
                      <View style={baseStyles.fieldContainer}>

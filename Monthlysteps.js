@@ -615,7 +615,7 @@ const styles = (theme) => StyleSheet.create({
         elevation: Platform.OS === 'android' ? (theme === darkTheme ? 1 : 2) : undefined,
     },
     detailRow: {
-        flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+        flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
         justifyContent: 'space-between', 
         alignItems: 'center', 
         paddingVertical: 16,
@@ -639,7 +639,7 @@ const styles = (theme) => StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: theme.accentColor,
-        textAlign: I18nManager.isRTL ? 'right' : 'left',
+        textAlign: I18nManager.isRTL ? 'left' : 'right',
         fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif', 
         fontVariant: ['tabular-nums'],
         flex: 1, 
